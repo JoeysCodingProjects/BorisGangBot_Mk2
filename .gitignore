@@ -333,4 +333,4 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 
-_config.yml
+*.yml
