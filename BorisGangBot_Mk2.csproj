@@ -13,10 +13,4 @@
     <PackageReference Include="TwitchLib" Version="3.1.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="_config.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>
