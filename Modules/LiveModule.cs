@@ -11,6 +11,7 @@ using TwitchLib.Api;
 using TwitchLib.Api.Helix;
 using TwitchLib.Api.Helix.Models.Streams;
 using TwitchLib.Api.Helix.Models.Users;
+using TwitchLib.Api.Helix.Models.Games;
 
 namespace BorisGangBot_Mk2.Modules
 {
@@ -21,6 +22,7 @@ namespace BorisGangBot_Mk2.Modules
         private readonly IConfigurationRoot _config;
         private GetStreamsResponse response = new GetStreamsResponse();
         private GetUsersResponse u_response = new GetUsersResponse();
+        private GetGamesResponse g_response = new GetGamesResponse();
 
         public LiveModule(IConfigurationRoot config)
         {
@@ -33,6 +35,7 @@ namespace BorisGangBot_Mk2.Modules
         {
             List<string> streams = new List<string>();
             List<StreamModel> streams_response = new List<StreamModel>();
+            List<string> games = new List<string>();
 
             api = new TwitchAPI();
             api.Settings.ClientId = _config["tokens:tw_cID"];
@@ -65,11 +68,21 @@ namespace BorisGangBot_Mk2.Modules
                     Stream = response.Streams[count].UserName,
                     Avatar = u_response.Users[count].ProfileImageUrl,
                     Live = true,
+                    Title = response.Streams[count].Title,
+                    Game = response.Streams[count].GameId,
+                    Viewers = response.Streams[count].ViewerCount
                 };
                 x.Link = $"https://www.twitch.tv/{x.Stream}";
 
                 streams_response.Add(x);
+                games.Add(x.Game);
                 count++;
+            }
+
+            g_response = await api.Helix.Games.GetGamesAsync(games, null);
+            for (int z = 0; z < g_response.Games.Length; z++)
+            {
+                streams_response[z].Game = g_response.Games[z].Name;
             }
 
             if (streams_response.Count == 0)
@@ -79,17 +92,36 @@ namespace BorisGangBot_Mk2.Modules
             {
                 foreach (StreamModel s in streams_response)
                 {
+                    var a_builder = new EmbedAuthorBuilder()
+                    {
+                        Name = s.Stream,
+                        IconUrl = s.Avatar
+                    };
+
                     var builder = new EmbedBuilder()
                     {
                         Color = new Color(255, 0, 0),
-                        Title = $"{s.Stream} is Live!",
-                        ImageUrl = s.Avatar,
-                        Url = s.Link
+                        Title = s.Title,
+                        ThumbnailUrl = s.Avatar,
+                        Url = s.Link,
+                        Author = a_builder
                     };
 
-                    Console.WriteLine(s.Avatar);
-                    await ReplyAsync("", false, builder.Build());
+                    builder.AddField(x=>
+                    {
+                        x.IsInline = true;
+                        x.Name = "**Playing:**";
+                        x.Value = s.Game;
+                    });
 
+                    builder.AddField(x =>
+                    {
+                        x.IsInline = true;
+                        x.Name = "**Viewers**";
+                        x.Value = s.Viewers;
+                    });
+
+                    await ReplyAsync("", false, builder.Build());
                 }
             }
         }
