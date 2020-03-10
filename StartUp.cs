@@ -14,6 +14,8 @@ namespace BorisGangBot_Mk2
     {
         public IConfigurationRoot Configuration { get; }
 
+        private string botUserName = "Boris Gang | ;help";
+
         public StartUp(string[] args)
         {
             var builder = new ConfigurationBuilder()
@@ -38,6 +40,7 @@ namespace BorisGangBot_Mk2
             provider.GetRequiredService<CommandHandler>();
 
             await provider.GetRequiredService<StartUpService>().StartAsync();
+
             await Task.Delay(-1);
         }
 

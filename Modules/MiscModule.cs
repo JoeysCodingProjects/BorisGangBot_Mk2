@@ -7,13 +7,14 @@ using Discord.Commands;
 
 namespace BorisGangBot_Mk2.Modules
 {
+    [Name("Misc. Commands")]
     public class MiscModule : ModuleBase<SocketCommandContext>
     {
-        [Name("source")]
+        [Command("source")]
         [Summary("Gives a link to Boris Gang Bot's source code.")]
         public async Task SourceAsync()
         {
-            await ReplyAsync($"");
+            await ReplyAsync($"https://github.com/JoeysCodingProjects/BorisGangBot_Mk2");
         }
     }
 }
