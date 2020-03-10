@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BorisGangBot_Mk2.Models;
@@ -62,6 +63,24 @@ namespace BorisGangBot_Mk2.Modules
                     await ReplyAsync("", false, x.Build());
                 }
             }
+        }
+
+        [Command("streamers")]
+        [Summary("Lists all Boris Gang streams known to the bot.")]
+        public async Task Streamers()
+        {
+            string stream;
+            string stream_final = "```\n ";
+            int count = 0;
+
+            while (!string.IsNullOrWhiteSpace(_config[$"streams:s{count}"]))
+            {
+                stream = _config[$"streams:s{count}"];
+                stream_final = stream_final.Insert(stream_final.Length - 1, $"{stream} ");
+                count++;
+            }
+            stream_final = stream_final.Insert(stream_final.Length - 1, "\n```");
+            await ReplyAsync(stream_final, false);
         }
     }
 }
