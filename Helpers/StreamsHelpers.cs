@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using BorisGangBot_Mk2.Models;
-using Microsoft.Extensions.Configuration;
 using TwitchLib;
 using TwitchLib.Api;
 using TwitchLib.Api.Helix;
@@ -15,13 +14,6 @@ namespace BorisGangBot_Mk2.Helpers
 {
     public class StreamsHelpers
     {
-        private readonly IConfiguration _config;
-
-        public StreamsHelpers(IConfiguration config)
-        {
-            _config = config;
-        }
-
         // Returns a list of StreamModels for a given list of stream names
         // Params: TwitchAPI, List<string>
         public async Task<List<StreamModel>> BG_GetLiveStreams(TwitchAPI api, List<string> s)
