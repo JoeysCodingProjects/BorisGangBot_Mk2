@@ -48,9 +48,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="streams.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="_config.yml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Modules\AudioModules\" />
   </ItemGroup>
 
 </Project>
