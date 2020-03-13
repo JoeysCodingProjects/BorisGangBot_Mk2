@@ -2,6 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BorisGangBot_Mk2;
 using BorisGangBot_Mk2.Models;
 using BorisGangBot_Mk2.Helpers;
 using Discord;
@@ -14,6 +15,9 @@ using TwitchLib.Api.Helix;
 using TwitchLib.Api.Helix.Models.Streams;
 using TwitchLib.Api.Helix.Models.Users;
 using TwitchLib.Api.Helix.Models.Games;
+using YamlDotNet.Serialization;
+using System.Linq;
+using System.IO;
 
 namespace BorisGangBot_Mk2.Modules
 {
@@ -41,11 +45,12 @@ namespace BorisGangBot_Mk2.Modules
             api.Settings.ClientId = _config["tokens:tw_cID"];
             api.Settings.AccessToken = _config["tokens:tw_token"];
 
-            int count = 0;
-            while (!string.IsNullOrWhiteSpace(_config[$"streams:s{count}"]))
+            using (var reader = new StringReader(File.ReadAllText("./streams.yml")))
             {
-                streams.Add(_config[$"streams:s{count}"]);
-                count++;
+                var deserializer = new Deserializer();
+
+                streams = deserializer.Deserialize<List<string>>(reader);
+                reader.Close();
             }
 
             s_response = await streamHelpers.BG_GetLiveStreams(api, streams);
