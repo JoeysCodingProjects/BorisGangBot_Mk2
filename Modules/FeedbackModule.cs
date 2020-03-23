@@ -6,6 +6,7 @@ using Discord;
 using Discord.API;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 
 namespace BorisGangBot_Mk2.Modules
 {
@@ -13,10 +14,12 @@ namespace BorisGangBot_Mk2.Modules
     public class FeedbackModule : ModuleBase<SocketCommandContext>
     {
         private readonly DiscordSocketClient _discord;
+        private readonly IConfigurationRoot _config;
 
-        public FeedbackModule(DiscordSocketClient discord)
+        public FeedbackModule(DiscordSocketClient discord, IConfigurationRoot config)
         {
             _discord = discord;
+            _config = config;
         }
 
         [Command("feedback")]
