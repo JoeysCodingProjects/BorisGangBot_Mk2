@@ -17,7 +17,7 @@ namespace BorisGangBot_Mk2.Services
 
         public LoggingService(DiscordSocketClient discord, CommandService commands)
         {
-            _logDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
+            _logDirectory = Path.Combine(AppContext.BaseDirectory, "Logs");
 
             _discord = discord;
             _commands = commands;
@@ -34,7 +34,8 @@ namespace BorisGangBot_Mk2.Services
                 File.Create(_logFile).Dispose();
 
             string logText = $"{DateTime.UtcNow.ToString("hh:mm:ss")} [{msg.Severity}] {msg.Source}: {msg.Exception?.ToString() ?? msg.Message}";
-            //File.AppendAllText(_logDirectory, logText + "\n");
+            
+            File.AppendAllText(_logFile, logText + "\n");
 
             return Console.Out.WriteLineAsync(logText);
         }
