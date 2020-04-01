@@ -14,8 +14,6 @@ namespace BorisGangBot_Mk2
     {
         public IConfigurationRoot Configuration { get; }
 
-        private string botUserName = "Boris Gang | ;help";
-
         public StartUp(string[] args)
         {
             var builder = new ConfigurationBuilder()
@@ -38,6 +36,7 @@ namespace BorisGangBot_Mk2
             var provider = services.BuildServiceProvider();
             provider.GetRequiredService<LoggingService>();
             provider.GetRequiredService<CommandHandler>();
+            provider.GetRequiredService<GuildJoinedService>();
 
             await provider.GetRequiredService<StartUpService>().StartAsync();
 
@@ -59,6 +58,7 @@ namespace BorisGangBot_Mk2
                 .AddSingleton<CommandHandler>()
                 .AddSingleton<StartUpService>()
                 .AddSingleton<LoggingService>()
+                .AddSingleton<GuildJoinedService>()
                 .AddSingleton<Random>()
                 .AddSingleton(Configuration);
         }
