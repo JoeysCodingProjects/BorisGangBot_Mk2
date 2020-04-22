@@ -32,12 +32,12 @@ namespace BorisGangBot_Mk2.Helpers
 
             streamslist = deserializer.Deserialize<List<string>>(result);
             
-            if (streamslist.Contains(streamer))
+            if (streamslist.Contains(streamer.ToLower()))
             {
                 return false;
             }
 
-            streamslist.Add(streamer);
+            streamslist.Add(streamer.ToLower());
             object newlist = serializer.Serialize(streamslist);
 
             File.WriteAllText("./Streamers.yml", newlist.ToString());
