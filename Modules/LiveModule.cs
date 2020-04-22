@@ -45,13 +45,16 @@ namespace BorisGangBot_Mk2.Modules
             api.Settings.ClientId = _config["tokens:tw_cID"];
             api.Settings.AccessToken = _config["tokens:tw_token"];
 
-            using (var reader = new StringReader(File.ReadAllText("./streams.yml")))
-            {
-                var deserializer = new Deserializer();
+            Deserializer deserializer = new Deserializer();
+            string result;
 
-                streams = deserializer.Deserialize<List<string>>(reader);
+            using (StreamReader reader = File.OpenText("./Streamers.yml"))
+            {
+                result = reader.ReadToEnd();
                 reader.Close();
             }
+
+            streams = deserializer.Deserialize<List<string>>(result);
 
             s_response = await streamHelpers.BG_GetLiveStreams(api, streams);
 
@@ -70,19 +73,27 @@ namespace BorisGangBot_Mk2.Modules
             }
         }
 
+        // FIX ME
         [Command("streamers")]
         [Summary("Lists all Boris Gang streams known to the bot.")]
         public async Task Streamers()
         {
-            string stream;
-            string stream_final = "```\n ";
-            int count = 0;
+            List<string> streams;
+            string stream_final = "```\n";
 
-            while (!string.IsNullOrWhiteSpace(_config[$"streams:s{count}"]))
+            Deserializer deserializer = new Deserializer();
+            string result;
+
+            using (StreamReader reader = File.OpenText("./Streamers.yml"))
             {
-                stream = _config[$"streams:s{count}"];
-                stream_final = stream_final.Insert(stream_final.Length - 1, $"{stream} ");
-                count++;
+                result = reader.ReadToEnd();
+                reader.Close();
+            }
+
+            streams = deserializer.Deserialize<List<string>>(result);
+            for (int i = 0; i < streams.Count(); i++ )
+            {
+                stream_final += $"{streams[i]} ";
             }
             stream_final = stream_final.Insert(stream_final.Length - 1, "\n```");
             await ReplyAsync(stream_final, false);

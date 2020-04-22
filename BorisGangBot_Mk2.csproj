@@ -48,6 +48,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Streamers.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="streams.yml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -58,6 +61,9 @@
 
   <ItemGroup>
     <Folder Include="Modules\AudioModules\" />
+    <Folder Include="Modules\BGMembersModules\" />
+    <Folder Include="Preconditions\ManagementPrecons\" />
+    <Folder Include="Services\TextChannelServices\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties streamers_1json__JsonSchema="http://json-schema.org/draft-04/schema" /></VisualStudio></ProjectExtensions>

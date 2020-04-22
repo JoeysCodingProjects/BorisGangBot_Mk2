@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BorisGangBot_Mk2.Models;
 using Discord;
+using Microsoft.Extensions.Configuration;
 using TwitchLib;
 using TwitchLib.Api;
 using TwitchLib.Api.Helix;
@@ -20,6 +21,7 @@ namespace BorisGangBot_Mk2.Helpers
         // Returns: List<StreamModel>
         public async Task<List<StreamModel>> BG_GetLiveStreams(TwitchAPI api, List<string> s)
         {
+
             // Key = GameID, Value = Game Name
             Dictionary<string, string> g_dictionary = new Dictionary<string, string>();
 
@@ -39,9 +41,10 @@ namespace BorisGangBot_Mk2.Helpers
                 // avatars and assigning them to the wrong streamer
                 s_live.Add(x.UserName);
             }
-            u_response = await api.Helix.Users.GetUsersAsync(null, s_live);
 
             if (s_response.Streams.Length == 0) { return streamModels; }
+
+            u_response = await api.Helix.Users.GetUsersAsync(null, s_live, "hb5w0knsvqeefe73hhho6kbq7tu9x4");
 
             for (int i = 0; i < s_response.Streams.Length; i++)
             {
