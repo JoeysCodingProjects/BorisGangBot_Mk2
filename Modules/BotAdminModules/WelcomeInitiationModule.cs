@@ -15,7 +15,7 @@ namespace BorisGangBot_Mk2.Modules.BotAdminModules
         [Summary("Creates the welcome initiates post.")]
         public async Task Welcome_Initiates()
         {
-            await ReplyAsync("you are the owner", false);
+            await ReplyAsync("Temp message explaining which emotes to react with for certain roles.", false);
         }
     }
 }
