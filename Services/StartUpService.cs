@@ -14,17 +14,20 @@ namespace BorisGangBot_Mk2.Services
         private readonly DiscordSocketClient _discord;
         private readonly CommandService _commands;
         private readonly IConfigurationRoot _config;
+        private readonly StreamMonoService _streams;
 
         public StartUpService(
             IServiceProvider provider,
             DiscordSocketClient discord,
             CommandService commands,
-            IConfigurationRoot config)
+            IConfigurationRoot config,
+            StreamMonoService streams)
         {
             _provider = provider;
             _discord = discord;
             _commands = commands;
             _config = config;
+            _streams = streams;
         }
 
         public async Task StartAsync()
@@ -39,6 +42,9 @@ namespace BorisGangBot_Mk2.Services
             await _discord.StartAsync();
 
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _provider); // Load commands and modules into the command service
+
+            _streams.UpdInt = 60; // Number of seconds between StreamMonoService updates
+            _streams.StartStreamMonoAsync();
         }
     }
 }

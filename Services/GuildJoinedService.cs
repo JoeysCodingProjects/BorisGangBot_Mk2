@@ -11,14 +11,10 @@ namespace BorisGangBot_Mk2.Services
     public class GuildJoinedService
     {
         private readonly DiscordSocketClient _discord;
-        private readonly IServiceProvider _provider;
 
-        public GuildJoinedService(
-            DiscordSocketClient discord,
-            IServiceProvider provider)
+        public GuildJoinedService(DiscordSocketClient discord)
         {
             _discord = discord;
-            _provider = provider;
 
             _discord.JoinedGuild += OnJoinedGuildAsync;
         }

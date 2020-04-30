@@ -12,8 +12,6 @@ using System.IO;
 
 namespace BorisGangBot_Mk2.Modules.BGMembersModules
 {
-    [Name("Add Streamer")]
-    [Summary("Adds a streamer to the list of known streamers.")]
     public class AddStreamerModule : ModuleBase<SocketCommandContext>
     {
         private IConfigurationRoot _config;

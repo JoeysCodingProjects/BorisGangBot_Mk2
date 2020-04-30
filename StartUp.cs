@@ -37,6 +37,7 @@ namespace BorisGangBot_Mk2
             provider.GetRequiredService<LoggingService>();
             provider.GetRequiredService<CommandHandler>();
             provider.GetRequiredService<GuildJoinedService>();
+            provider.GetRequiredService<StreamMonoService>();
 
             await provider.GetRequiredService<StartUpService>().StartAsync();
 
@@ -59,6 +60,7 @@ namespace BorisGangBot_Mk2
                 .AddSingleton<StartUpService>()
                 .AddSingleton<LoggingService>()
                 .AddSingleton<GuildJoinedService>()
+                .AddSingleton<StreamMonoService>()
                 .AddSingleton<Random>()
                 .AddSingleton(Configuration);
         }
