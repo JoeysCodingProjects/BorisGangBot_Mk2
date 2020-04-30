@@ -30,7 +30,7 @@ namespace BorisGangBot_Mk2.Modules.BotAdminModules
         [Summary("I still use print statements to test my code because im a naughty boy")]
         public async Task SendRandomInfoAsync()
         {
-            await ReplyAsync($"{_streams.StreamList[2]} this many milliseconds", false);
+            await ReplyAsync($"{_streams.LiveStreamMonitor.ChannelsToMonitor[0]}", false);
         }
     }
 }

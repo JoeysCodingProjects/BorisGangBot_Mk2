@@ -12,6 +12,7 @@ using System.IO;
 
 namespace BorisGangBot_Mk2.Modules.BGMembersModules
 {
+    [RequireUserPermission(Discord.GuildPermission.Administrator)]
     public class AddStreamerModule : ModuleBase<SocketCommandContext>
     {
         private IConfigurationRoot _config;

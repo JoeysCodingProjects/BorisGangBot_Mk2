@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
@@ -43,8 +44,9 @@ namespace BorisGangBot_Mk2.Services
 
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _provider); // Load commands and modules into the command service
 
+            
             _streams.UpdInt = 60; // Number of seconds between StreamMonoService updates
-            _streams.StartStreamMonoAsync();
+
         }
     }
 }

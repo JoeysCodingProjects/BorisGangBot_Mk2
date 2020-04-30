@@ -26,6 +26,7 @@ namespace BorisGangBot_Mk2
         {
             var startup = new StartUp(args);
             await startup.RunAsync();
+
         }
 
         public async Task RunAsync()
