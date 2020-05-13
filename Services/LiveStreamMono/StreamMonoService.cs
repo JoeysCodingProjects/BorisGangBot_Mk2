@@ -19,8 +19,8 @@ namespace BorisGangBot_Mk2.Services
 {
     public class StreamMonoService : LiveStreamMono.StreamMonoServiceBase
     {
-        private IConfigurationRoot _config;
-        private DiscordSocketClient _discord;
+        private readonly IConfigurationRoot _config;
+        private readonly DiscordSocketClient _discord;
         public LiveStreamMonitorService LiveStreamMonitor;
 
 
