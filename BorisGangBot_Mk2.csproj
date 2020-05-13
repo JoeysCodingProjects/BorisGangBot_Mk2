@@ -68,7 +68,7 @@
   <ItemGroup>
     <Folder Include="Modules\FunnyModules\" />
     <Folder Include="Modules\MembersModules\" />
-    <Folder Include="Preconditions\ManagementPrecons\" />
+    <Folder Include="Preconditions\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties streamers_1json__JsonSchema="http://json-schema.org/draft-04/schema" /></VisualStudio></ProjectExtensions>

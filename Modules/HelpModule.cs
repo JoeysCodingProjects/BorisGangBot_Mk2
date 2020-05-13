@@ -18,6 +18,7 @@ namespace BorisGangBot_Mk2.Modules
             _config = config;
         }
 
+        #region Help Command General
         [Command("help")]
         [Summary("Lists the available commands for Boris Gang Bot.")]
         public async Task HelpAsync()
@@ -52,7 +53,9 @@ namespace BorisGangBot_Mk2.Modules
 
             await ReplyAsync("", false, builder.Build());
         }
+        #endregion
 
+        #region Help Command Specific
         [Command("help")]
         [Summary("Add a command to the end to get more information about it.")]
         public async Task HelpAsync(string command)
@@ -86,5 +89,6 @@ namespace BorisGangBot_Mk2.Modules
 
             await ReplyAsync("", false, builder.Build());
         }
+        #endregion
     }
 }
