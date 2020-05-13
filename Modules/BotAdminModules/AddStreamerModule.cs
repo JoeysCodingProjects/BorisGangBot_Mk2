@@ -9,69 +9,79 @@ using Microsoft.Extensions.Configuration;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 using System.IO;
+using BorisGangBot_Mk2.Services;
 
 namespace BorisGangBot_Mk2.Modules.BGMembersModules
 {
     [RequireUserPermission(Discord.GuildPermission.Administrator)]
     public class AddStreamerModule : ModuleBase<SocketCommandContext>
     {
-        private IConfigurationRoot _config;
-        
-
-        public AddStreamerModule(IConfigurationRoot config)
+        public AddStreamerModule()
         {
-            _config = config;
         }
 
+        // AddStreamerAsync
+        //
+        // Parameters:
+        // streamer (string)
+
+        #region AddStreamerAsync
         [Command("addstreamer")]
         [Summary("Manually add a streamer to the list of streamers.")]
-        //[RequireUserPermission(Discord.GuildPermission.Administrator)]
+        [RequireUserPermission(Discord.GuildPermission.Administrator)]
         public async Task AddStreamerAsync(string streamer)
         {
-            AddStreamerHelper addStreamer = new AddStreamerHelper(_config);
-            bool t = addStreamer.AddStreamer(streamer);
+            StreamerFileHelper addStreamer = new StreamerFileHelper();
+            bool t = await addStreamer.TryAddStreamerAsync(streamer);
 
-            if (t)
+            try
             {
-                await ReplyAsync($"Successfully added {streamer}!", false);
+                if (t)
+                {
+                    await ReplyAsync($"Successfully added {streamer}!", false);
+                }
+                else
+                {
+                    await ReplyAsync("That streamer is already on the list.", false);
+                }
             }
-            else
+            catch (Exception e)
             {
-                await ReplyAsync("That streamer is already on the list.", false);
+                await ReplyAsync("Something went wrong adding this streamer.");
             }
         }
+        #endregion
 
+        // RemoveStreamerAsync
+        //
+        // Parameters:
+        // streamer (string)
+
+        #region RemoveStreamerAsync
         [Command("removestreamer")]
         [Summary("Removes the mentioned streamer from the list.")]
         [RequireUserPermission(Discord.GuildPermission.Administrator)]
         public async Task RemoveStreamerAsync(string streamer)
         {
-            List<string> streamslist = new List<string>();
+            StreamerFileHelper sfh = new StreamerFileHelper();
+            bool t = await sfh.TryRemoveStreamerAsync(streamer);
 
-            Deserializer deserializer = new Deserializer();
-            Serializer serializer = new Serializer();
-            string result;
-
-            using (StreamReader reader = File.OpenText("./Streamers.yml"))
+            try
             {
-                result = reader.ReadToEnd();
-                reader.Close();
+                if (t)
+                {
+                    await ReplyAsync($"Successfully removed {streamer}.");
+                }
+                else
+                {
+                    await ReplyAsync($"That streamer was not found. Double check your spelling or make sure they are on the list using the ;streamers command.");
+                }
             }
-
-            streamslist = deserializer.Deserialize<List<string>>(result);
-
-            if (streamslist.Contains(streamer))
+            catch (Exception e)
             {
-                streamslist.Remove(streamer);
-                object newlist = serializer.Serialize(streamslist);
-                File.WriteAllText("./Streamers.yml", newlist.ToString());
-                await ReplyAsync($"Streamer {streamer} successfully removed.", false);
-            }
-            else
-            {
-                await ReplyAsync($"Could not find {streamer}", false);
+                await ReplyAsync("Something went wrong trying to remove this streamer.");
             }
         }
-
+        #endregion
     }
 }
