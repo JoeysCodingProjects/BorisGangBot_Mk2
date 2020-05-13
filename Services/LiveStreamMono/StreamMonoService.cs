@@ -41,6 +41,7 @@ namespace BorisGangBot_Mk2.Services
 
         }
 
+        #region CreateStreamMonoAsync
         private async Task CreateStreamMonoAsync()
         {
             await Task.Run(() => GetStreamerList());
@@ -94,6 +95,10 @@ namespace BorisGangBot_Mk2.Services
             LiveStreamMonitor.Start();
         }
 
+        #endregion
+
+
+        #region Events
         // -----
         // Events
         // -----
@@ -152,6 +157,9 @@ namespace BorisGangBot_Mk2.Services
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: TwitchAPI Creation finished.");
         }
 
+        #endregion
+
+        #region Monitor Service Required Functions
         // -----
         // Monitor Service Required Functions
         // -----
@@ -264,6 +272,9 @@ namespace BorisGangBot_Mk2.Services
             return eb_list;
         }
 
+        #endregion
+
+        #region General Purpose Functions
         // -----
         // General Purpose Functions
         // -----
@@ -273,5 +284,7 @@ namespace BorisGangBot_Mk2.Services
 
             return fileupdated;
         }
+
+        #endregion
     }
 }
