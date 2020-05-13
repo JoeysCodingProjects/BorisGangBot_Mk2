@@ -1,8 +1,7 @@
 # BorisGangBot_Mk2
-## To Do:
-- Ability to change command prefix
-- Add automatic live notifications
-- Specify what channel to send live notifications
-- Music bot capabilities 
-- Feet pics
-- Corgi pics
+
+## Written in C# using Discord.Net and TwitchLib
+
+
+## What is this?
+BorisGangBot is a project of mine to create my own fully fleshed out bot for my friends and I's discord server.
