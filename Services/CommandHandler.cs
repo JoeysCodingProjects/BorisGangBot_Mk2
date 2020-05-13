@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BorisGangBot_Mk2.Helpers;
+using System;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -45,7 +46,11 @@ namespace BorisGangBot_Mk2.Services
                 var result = await _commands.ExecuteAsync(context, argPos, _provider); // Execute command
 
                 if (!result.IsSuccess)
-                    await context.Channel.SendMessageAsync(result.ToString());
+                {
+                    MessageOwnerHelper moh = new MessageOwnerHelper(_discord);
+                    await moh.MessageOwnerAsync(msg, result.ErrorReason.ToString());
+                    //await context.Channel.SendMessageAsync(result.ToString());
+                }
             }
         }
     }
