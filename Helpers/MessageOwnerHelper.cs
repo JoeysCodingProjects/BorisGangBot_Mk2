@@ -19,6 +19,7 @@ namespace BorisGangBot_Mk2.Helpers
 
         // This is the ID of the Direct Message channel between the bot
         // and it's owner. Used to make sending owner important updates easier.
+        // NOTE: YOU MUST MESSAGE THE BOT ANY TIME IT RESTARTS TO CREATE THE DMCHANNEL
         private ulong dm_channel_id = 687034508477726748;
 
 
@@ -39,6 +40,11 @@ namespace BorisGangBot_Mk2.Helpers
         {
             // Create the DMChannel object to send message to owner
             var dmchannel = await _discord.GetDMChannelAsync(dm_channel_id);
+            if (dmchannel == null)
+            {
+                Console.Out.WriteLine("[DM CHANNEL] Do Not Forget - DM the bot to create the error reporting DM channel.");
+                return;
+            }
             StringBuilder sb = new StringBuilder();
 
             string cmd = msg.Content.Remove(0, 1);
@@ -58,10 +64,9 @@ namespace BorisGangBot_Mk2.Helpers
             
             if (dmchannel == null)
             {
-                Console.Out.WriteLine($"{msg.Channel.Id}");
                 return;
             }
-            await dmchannel.SendMessageAsync("hello");
+            await dmchannel.SendMessageAsync(sb.ToString());
         }
         #endregion
     }

@@ -47,9 +47,16 @@ namespace BorisGangBot_Mk2.Services
 
                 if (!result.IsSuccess)
                 {
-                    MessageOwnerHelper moh = new MessageOwnerHelper(_discord);
-                    await moh.MessageOwnerAsync(msg, result.ErrorReason.ToString());
-                    //await context.Channel.SendMessageAsync(result.ToString());
+                    if (result.ErrorReason.ToString().Equals("Unknown command."))
+                    {
+                        await context.Channel.SendMessageAsync("I don't know that command, sorry.");
+                    }
+                    else
+                    {
+                        MessageOwnerHelper moh = new MessageOwnerHelper(_discord);
+                        await moh.MessageOwnerAsync(msg, result.ErrorReason.ToString());
+                        await context.Channel.SendMessageAsync(result.ToString());
+                    }
                 }
             }
         }
