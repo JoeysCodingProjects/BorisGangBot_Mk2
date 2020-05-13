@@ -1,9 +1,5 @@
-﻿using BorisGangBot_Mk2.Services;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 
@@ -38,7 +34,7 @@ namespace BorisGangBot_Mk2.Helpers
                 result = await reader.ReadToEndAsync();
                 reader.Close();
             }
-            
+
             List<string> streamslist = deserializer.Deserialize<List<string>>(result);
 
             if (streamslist.Contains(s))

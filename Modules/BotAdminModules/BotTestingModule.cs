@@ -1,21 +1,15 @@
-﻿using BorisGangBot_Mk2.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BorisGangBot_Mk2.Services;
+using BorisGangBot_Mk2.Services.GuildInfo;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
-using YamlDotNet.RepresentationModel;
-using YamlDotNet.Serialization;
-using System.IO;
-using BorisGangBot_Mk2.Services;
-using BorisGangBot_Mk2.Services.GuildInfo;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace BorisGangBot_Mk2.Modules.BotAdminModules
 {
     [RequireOwner]
-    public class BotTestingModule:ModuleBase<SocketCommandContext>
+    public class BotTestingModule : ModuleBase<SocketCommandContext>
     {
         private IConfigurationRoot _config;
         private StreamMonoService _streams;

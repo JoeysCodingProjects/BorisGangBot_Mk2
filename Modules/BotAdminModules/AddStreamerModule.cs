@@ -1,15 +1,7 @@
 ﻿using BorisGangBot_Mk2.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using Discord.Commands;
-using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
-using YamlDotNet.RepresentationModel;
-using YamlDotNet.Serialization;
-using System.IO;
-using BorisGangBot_Mk2.Services;
+using System;
+using System.Threading.Tasks;
 
 namespace BorisGangBot_Mk2.Modules.BGMembersModules
 {
