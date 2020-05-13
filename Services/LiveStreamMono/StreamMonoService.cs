@@ -22,13 +22,23 @@ namespace BorisGangBot_Mk2.Services
         private IConfigurationRoot _config;
         private DiscordSocketClient _discord;
         public LiveStreamMonitorService LiveStreamMonitor;
-        private List<ulong> streamNotifChannels = new List<ulong>();
+
+
 
         public StreamMonoService(IConfigurationRoot config, DiscordSocketClient discord)
         {
             _config = config;
             _discord = discord;
             _discord.Ready += CreateStreamMonoAsync;
+
+
+            // Service update interval in seconds
+            UpdInt = 60;
+            
+            // Name of channel to use when sending notifications
+            NotifChannelName = "stream-updates";
+
+
         }
 
         private async Task CreateStreamMonoAsync()
@@ -50,7 +60,7 @@ namespace BorisGangBot_Mk2.Services
                 while (currentPos != IEguilds.Current.TextChannels.Count - 1)
                 {
                     currentPos = IEchannels.Current.Position;
-                    if (IEchannels.Current.Name == "stream-updates")
+                    if (IEchannels.Current.Name.Contains(NotifChannelName))
                     {
                         StreamNotifChannels.Add(IEchannels.Current);
                         break;
@@ -71,7 +81,7 @@ namespace BorisGangBot_Mk2.Services
                 Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService ERROR]: No Stream Update Notification channels were found!");
             }
 
-            LiveStreamMonitor = new LiveStreamMonitorService(TwAPI, 20);
+            LiveStreamMonitor = new LiveStreamMonitorService(TwAPI, UpdInt);
 
             LiveStreamMonitor.OnChannelsSet += OnChannelsSetEvent;
             LiveStreamMonitor.OnServiceStarted += OnServiceStartedEvent;
@@ -81,10 +91,12 @@ namespace BorisGangBot_Mk2.Services
             LiveStreamMonitor.Start();
         }
 
+        // -----
+        // Events
+        // -----
         private void OnServiceStartedEvent(object sender, OnServiceStartedArgs e)
         {
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Live Stream Monitor Service started successfully.");
-            
         }
 
         private async void OnStreamOnlineEventAsync(object sender, OnStreamOnlineArgs e)

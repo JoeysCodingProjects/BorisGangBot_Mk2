@@ -32,8 +32,8 @@ namespace BorisGangBot_Mk2.Modules
             _config = config;
         }
 
-        [Command("live")]
-        [Summary("Lists all currently streaming members of Boris Gang.")]
+        //[Command("live")]
+        //[Summary("Lists all currently streaming members of Boris Gang.")]
         public async Task Live()
         {
             List<EmbedBuilder> eb_list = new List<EmbedBuilder>();
@@ -73,7 +73,6 @@ namespace BorisGangBot_Mk2.Modules
             }
         }
 
-        // FIX ME
         [Command("streamers")]
         [Summary("Lists all Boris Gang streams known to the bot.")]
         public async Task Streamers()

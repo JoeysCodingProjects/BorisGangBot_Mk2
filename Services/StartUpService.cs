@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using BorisGangBot_Mk2.Services.GuildInfo;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -16,19 +17,22 @@ namespace BorisGangBot_Mk2.Services
         private readonly CommandService _commands;
         private readonly IConfigurationRoot _config;
         private readonly StreamMonoService _streams;
+        private readonly GuildInfoService _guildinfo;
 
         public StartUpService(
             IServiceProvider provider,
             DiscordSocketClient discord,
             CommandService commands,
             IConfigurationRoot config,
-            StreamMonoService streams)
+            StreamMonoService streams,
+            GuildInfoService guildinfo)
         {
             _provider = provider;
             _discord = discord;
             _commands = commands;
             _config = config;
             _streams = streams;
+            _guildinfo = guildinfo;
         }
 
         public async Task StartAsync()
@@ -43,9 +47,6 @@ namespace BorisGangBot_Mk2.Services
             await _discord.StartAsync();
 
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _provider); // Load commands and modules into the command service
-
-            
-            _streams.UpdInt = 60; // Number of seconds between StreamMonoService updates
 
         }
     }

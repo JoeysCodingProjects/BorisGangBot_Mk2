@@ -35,5 +35,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         public List<EmbedBuilder> StreamEmbeds { get; set; }
 
         public List<SocketTextChannel> StreamNotifChannels = new List<SocketTextChannel>();
+
+        public string NotifChannelName { get; protected set; }
     }
 }

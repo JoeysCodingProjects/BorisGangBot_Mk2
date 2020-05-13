@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using BorisGangBot_Mk2.Services;
+using BorisGangBot_Mk2.Services.GuildInfo;
 
 namespace BorisGangBot_Mk2
 {
@@ -39,6 +40,7 @@ namespace BorisGangBot_Mk2
             provider.GetRequiredService<CommandHandler>();
             provider.GetRequiredService<GuildJoinedService>();
             provider.GetRequiredService<StreamMonoService>();
+            provider.GetRequiredService<GuildInfoService>();
 
             await provider.GetRequiredService<StartUpService>().StartAsync();
 
@@ -62,6 +64,7 @@ namespace BorisGangBot_Mk2
                 .AddSingleton<LoggingService>()
                 .AddSingleton<GuildJoinedService>()
                 .AddSingleton<StreamMonoService>()
+                .AddSingleton<GuildInfoService>()
                 .AddSingleton<Random>()
                 .AddSingleton(Configuration);
         }
