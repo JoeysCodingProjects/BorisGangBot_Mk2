@@ -32,4 +32,9 @@ command to bot possible.
 ## Feel free to use any of the code you see!
 I apologize for the lack of comments, still working on that. Also, I hope you can ignore
 all the inside jokes or weirdly named variables. Please feel free to ask any questions 
-by submitting an Issue (pretty good way to get in touch with me) or by
+by submitting an Issue (pretty good way to get in touch with me) or by some other means
+you can think of assuming you can get my info.
+
+
+Anyways, hope someone finds this useful. Took a lot of time to learn all this but should anyone stumble upon this code
+looking for help in writing a discord bot in C#, it should come in handy a decent bit. Enjoy!
