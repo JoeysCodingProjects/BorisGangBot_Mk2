@@ -34,7 +34,7 @@ namespace BorisGangBot_Mk2.Services
 
             // Service update interval in seconds
             UpdInt = 60;
-            
+
             // Name of channel to use when sending notifications
             NotifChannelName = "stream-updates";
 
@@ -49,7 +49,7 @@ namespace BorisGangBot_Mk2.Services
 
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: GUILD COUNT {_discord.Guilds.Count}");
 
-            
+
             IEnumerator<SocketGuild> IEguilds = _discord.Guilds.GetEnumerator();
             IEguilds.MoveNext();
             while (IEguilds.Current != null)
@@ -115,7 +115,7 @@ namespace BorisGangBot_Mk2.Services
             List<EmbedBuilder> eblist = BG_CreateStreamerEmbeds(streammodellist);
             foreach (SocketTextChannel x in StreamNotifChannels)
             {
-                foreach(EmbedBuilder z in eblist)
+                foreach (EmbedBuilder z in eblist)
                 {
                     await x.SendMessageAsync(null, false, z.Build());
                 }
@@ -146,7 +146,7 @@ namespace BorisGangBot_Mk2.Services
             StreamList = deserializer.Deserialize<List<string>>(result);
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: StreamerList Creation finished.");
         }
-        
+
         private void CreateTwitchAPI()
         {
             TwitchAPI _twapi = new TwitchAPI();
@@ -187,8 +187,8 @@ namespace BorisGangBot_Mk2.Services
                 s_live.Add(x.UserName);
             }
 
-            if (s_response.Streams.Length == 0) 
-            { 
+            if (s_response.Streams.Length == 0)
+            {
                 return streamModels;
             }
 

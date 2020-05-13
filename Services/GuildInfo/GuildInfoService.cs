@@ -1,7 +1,6 @@
 ﻿using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BorisGangBot_Mk2.Services.GuildInfo
@@ -35,7 +34,7 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
             _discord.GuildUnavailable += ClearGuildRolesAsync;
             _discord.GuildAvailable += StoreGuildAsync;
             _discord.GuildAvailable += StoreGuildRolesAsync;
-            
+
         }
 
 
@@ -62,7 +61,7 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
         #region Store/Clear Guild Roles
 
         private Task StoreGuildRolesAsync(SocketGuild guild)
-        { 
+        {
             IReadOnlyCollection<SocketRole> ROroles = guild.Roles;
             Dictionary<string, SocketRole> guildroles = CreateRoleDictionary(ROroles.GetEnumerator(), ROroles.Count);
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [Guild Info Service]: Successfully saved roles for the guild {guild.Name}");
@@ -101,7 +100,7 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
 
             return roles;
         }
-        
+
         #endregion
 
         #endregion

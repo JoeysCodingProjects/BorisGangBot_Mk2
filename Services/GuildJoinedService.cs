@@ -1,10 +1,5 @@
-﻿using System;
-using System.Text;
+﻿using Discord.WebSocket;
 using System.Threading.Tasks;
-using BorisGangBot_Mk2.Models;
-using Discord;
-using Discord.WebSocket;
-using Newtonsoft.Json;
 
 namespace BorisGangBot_Mk2.Services
 {
