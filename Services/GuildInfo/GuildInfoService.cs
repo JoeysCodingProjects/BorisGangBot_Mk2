@@ -90,7 +90,6 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
             int i = 1;
             while (i < count + 1)
             {
-                Console.Out.WriteLine($"{guildRolesPtr.Current.Name}");
                 roles.Add(guildRolesPtr.Current.Name.ToLower(), guildRolesPtr.Current);
                 i++;
                 guildRolesPtr.MoveNext();
