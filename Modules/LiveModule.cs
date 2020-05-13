@@ -1,23 +1,14 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using BorisGangBot_Mk2;
+﻿using BorisGangBot_Mk2.Helpers;
 using BorisGangBot_Mk2.Models;
-using BorisGangBot_Mk2.Helpers;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
-using TwitchLib;
-using TwitchLib.Api;
-using TwitchLib.Api.Helix;
-using TwitchLib.Api.Helix.Models.Streams;
-using TwitchLib.Api.Helix.Models.Users;
-using TwitchLib.Api.Helix.Models.Games;
-using YamlDotNet.Serialization;
-using System.Linq;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using TwitchLib.Api;
+using YamlDotNet.Serialization;
 
 namespace BorisGangBot_Mk2.Modules
 {
@@ -32,8 +23,10 @@ namespace BorisGangBot_Mk2.Modules
             _config = config;
         }
 
+        #region Live Command DEPRECATED
         //[Command("live")]
         //[Summary("Lists all currently streaming members of Boris Gang.")]
+
         public async Task Live()
         {
             List<EmbedBuilder> eb_list = new List<EmbedBuilder>();
@@ -72,9 +65,12 @@ namespace BorisGangBot_Mk2.Modules
                 }
             }
         }
+        #endregion
 
+        #region Streamers Command
         [Command("streamers")]
         [Summary("Lists all Boris Gang streams known to the bot.")]
+
         public async Task Streamers()
         {
             List<string> streams;
@@ -90,12 +86,13 @@ namespace BorisGangBot_Mk2.Modules
             }
 
             streams = deserializer.Deserialize<List<string>>(result);
-            for (int i = 0; i < streams.Count(); i++ )
+            for (int i = 0; i < streams.Count(); i++)
             {
                 stream_final += $"{streams[i]} ";
             }
             stream_final = stream_final.Insert(stream_final.Length - 1, "\n```");
             await ReplyAsync(stream_final, false);
         }
+        #endregion
     }
 }

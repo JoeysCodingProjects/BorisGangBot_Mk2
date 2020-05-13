@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using BorisGangBot_Mk2.Models;
+﻿using BorisGangBot_Mk2.Models;
 using Discord;
-using Microsoft.Extensions.Configuration;
-using TwitchLib;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using TwitchLib.Api;
-using TwitchLib.Api.Helix;
 using TwitchLib.Api.Helix.Models.Games;
 using TwitchLib.Api.Helix.Models.Streams;
 using TwitchLib.Api.Helix.Models.Users;
@@ -16,24 +11,26 @@ namespace BorisGangBot_Mk2.Helpers
 {
     public class StreamHelpers
     {
-        // Returns a list of StreamModels for a given list of stream names
-        // Params: TwitchAPI, List<string>
-        // Returns: List<StreamModel>
+        // BG_GetLiveStreams
+        //
+        // Params: 
+        // api (TwitchAPI)
+        // s (List<string>)
+        //
+        // Returns:
+        // List<StreamModel>
+
+        #region BG_GetLiveStreams(TwitchAPI, List<string>) DEPRICATED
         public async Task<List<StreamModel>> BG_GetLiveStreams(TwitchAPI api, List<string> s)
         {
-
             // Key = GameID, Value = Game Name
             Dictionary<string, string> g_dictionary = new Dictionary<string, string>();
-
-            GetGamesResponse g_response = new GetGamesResponse();
-            GetStreamsResponse s_response = new GetStreamsResponse();
-            GetUsersResponse u_response = new GetUsersResponse();
 
             List<string> g_IDs = new List<string>();
             List<string> s_live = new List<string>();
             List<StreamModel> streamModels = new List<StreamModel>();
 
-            s_response = await api.Helix.Streams.GetStreamsAsync(null, null, s.Count, null, null, "all", null, s);
+            GetStreamsResponse s_response = await api.Helix.Streams.GetStreamsAsync(null, null, s.Count, null, null, "all", null, s);
             foreach (Stream x in s_response.Streams)
             {
                 // Only get the avatars of streams that are live
@@ -44,7 +41,7 @@ namespace BorisGangBot_Mk2.Helpers
 
             if (s_response.Streams.Length == 0) { return streamModels; }
 
-            u_response = await api.Helix.Users.GetUsersAsync(null, s_live, "hb5w0knsvqeefe73hhho6kbq7tu9x4");
+            GetUsersResponse u_response = await api.Helix.Users.GetUsersAsync(null, s_live, "hb5w0knsvqeefe73hhho6kbq7tu9x4");
 
             for (int i = 0; i < s_response.Streams.Length; i++)
             {
@@ -62,8 +59,8 @@ namespace BorisGangBot_Mk2.Helpers
                 if (!g_IDs.Contains(stream_daddy.Game)) { g_IDs.Add(stream_daddy.Game); }
             }
 
-            g_response = await api.Helix.Games.GetGamesAsync(g_IDs, null);
-            
+            GetGamesResponse g_response = await api.Helix.Games.GetGamesAsync(g_IDs, null);
+
             foreach (TwitchLib.Api.Helix.Models.Games.Game x in g_response.Games)
             {
                 g_dictionary.TryAdd(x.Id, x.Name);
@@ -78,10 +75,17 @@ namespace BorisGangBot_Mk2.Helpers
 
             return streamModels;
         }
+        #endregion
 
-        // Creates the EmbedBuilder(s) for all given streams
-        // Params: List<StreamModel>
-        // Returns: List<EmbedBuilder>
+        // BG_CreateStreamerEmbeds
+        //
+        // Params: 
+        // s (List<StreamModel>)
+        //
+        // Returns: 
+        // List<EmbedBuilder>
+
+        #region BG_CreateStreamerEmbeds DEPRICATED
         public List<EmbedBuilder> BG_CreateStreamerEmbeds(List<StreamModel> s)
         {
             List<EmbedBuilder> eb_list = new List<EmbedBuilder>();
@@ -119,5 +123,6 @@ namespace BorisGangBot_Mk2.Helpers
 
             return eb_list;
         }
+        #endregion
     }
 }
