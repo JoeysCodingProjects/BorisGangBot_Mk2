@@ -57,11 +57,9 @@ namespace BorisGangBot_Mk2.Services
                 int currentPos = 0;
                 Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Current Guild: {IEguilds.Current.Name}");
                 IEnumerator<SocketTextChannel> IEchannels = IEguilds.Current.TextChannels.GetEnumerator();
-                Console.Out.WriteLine(IEguilds.Current.TextChannels.Count);
                 IEchannels.MoveNext();
                 while (currentPos != IEguilds.Current.TextChannels.Count - 1)
                 {
-                    Console.Out.WriteLine(currentPos);
                     currentPos++;
                     if (IEchannels.Current.Name.Contains(NotifChannelName))
                     {
