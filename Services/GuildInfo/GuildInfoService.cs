@@ -38,15 +38,12 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
             
         }
 
-        //
-        //
-        // Primary functions for GuildInfo
-        //
-        //
 
-        //
-        // Store/Clear guilds 
-        //
+        #region Primary functions for GuildInfo
+
+
+        #region Store/Clear guilds 
+
         private Task StoreGuildAsync(SocketGuild guild)
         {
             if (guild == null)
@@ -60,9 +57,10 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
             return Task.Run(() => Guilds.Remove(guild.Id));
         }
 
-        //
-        // Store/Clear Guild Roles
-        //
+        #endregion
+
+        #region Store/Clear Guild Roles
+
         private Task StoreGuildRolesAsync(SocketGuild guild)
         { 
             IReadOnlyCollection<SocketRole> ROroles = guild.Roles;
@@ -76,11 +74,16 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
             return Task.Run(() => GuildRoles.Remove(guild.Id));
         }
 
-        //
-        //
-        // Secondary functions for Guild Info (Supporting Functions)
-        //
-        //
+        #endregion
+
+
+        #endregion
+
+
+        #region Secondary functions for Guild Info (Supporting Functions)
+
+
+        #region CreateRoleDictionary
 
         private Dictionary<string, SocketRole> CreateRoleDictionary(IEnumerator<SocketRole> guildRoles, int count)
         {
@@ -98,5 +101,9 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
 
             return roles;
         }
+        
+        #endregion
+
+        #endregion
     }
 }
