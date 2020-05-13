@@ -192,7 +192,7 @@ namespace BorisGangBot_Mk2.Services
                 return streamModels;
             }
 
-            u_response = await TwAPI.Helix.Users.GetUsersAsync(null, s_live, "hb5w0knsvqeefe73hhho6kbq7tu9x4");
+            u_response = await TwAPI.Helix.Users.GetUsersAsync(null, s_live, _config["tokens:tw_token"]);
 
             for (int i = 0; i < s_response.Streams.Length; i++)
             {
