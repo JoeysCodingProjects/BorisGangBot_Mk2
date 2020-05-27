@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using BorisGangBot_Mk2.Services.GuildInfo;
+﻿using BorisGangBot_Mk2.Services.GuildInfo;
 using Discord.Commands;
 using Discord.WebSocket;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BorisGangBot_Mk2.Modules.RoleModules
 {
-    [Name("Role Request Module")]
+    [Name("Role Management")]
     public class RoleRequestModule : ModuleBase<SocketCommandContext>
     {
         private readonly DiscordSocketClient _discord;
@@ -27,31 +26,66 @@ namespace BorisGangBot_Mk2.Modules.RoleModules
             SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
             SocketRole rolo;
             Dictionary<string, SocketRole> guildRoles;
-            string userroles = user.Roles.GetEnumerator().ToString().ToLower();
+            string rolelower = role.ToLower();
+
+            IEnumerable<string> userroles = user.Roles.Select(r => r.Name.ToLower());
 
             _guildinfo.GuildRoles.TryGetValue(Context.Guild.Id, out guildRoles);
 
-            if (userroles.Contains(role))
+            if (userroles.Contains(rolelower))
             {
-                await ReplyAsync($"You are already assigned the role {role}.");
+                await ReplyAsync($"{Context.User.Mention} You are already assigned the role {role}.");
+                return;
             }
-            else if (!(_guildinfo.RoleMeEnabledRoles.Contains(role.ToLower())))
+            try
             {
-                await ReplyAsync("Invalid role. Either it doesn't exist or you aren't allowed to self assign it.");
+                if (!(user.Roles.ToString().Contains("BorisGoon")) && !(user.Roles.ToString().Contains("BorisGang")))
+                {
+                    guildRoles.TryGetValue("borisgoon", out rolo);
+                    await user.AddRoleAsync(rolo);
+                    guildRoles.TryGetValue(rolelower, out rolo);
+                    await user.AddRoleAsync(rolo);
+                }
+                else
+                {
+                    guildRoles.TryGetValue(rolelower, out rolo);
+                    await user.AddRoleAsync(rolo);
+                }
             }
-            else if (!(user.Roles.ToString().Contains("BorisGoon")) && !(user.Roles.ToString().Contains("BorisGang")))
+            catch (Discord.Net.HttpException e)
             {
-                guildRoles.TryGetValue("borisgoon", out rolo);
-                await user.AddRoleAsync(rolo);
-                guildRoles.TryGetValue(role.ToLower(), out rolo);
-                await user.AddRoleAsync(rolo);
+                System.Net.HttpStatusCode sc = System.Net.HttpStatusCode.Forbidden;
+                if (e.HttpCode == sc)
+                    await ReplyAsync($"{Context.User.Mention} You don't have permission to receive that role.");
+
+                return;
+            }
+            await ReplyAsync($"{Context.User.Mention} Your roles have been updated.");
+        }
+
+        [Command("removerole")]
+        [Summary("Removes the role that you have specified.")]
+        public async Task RemoveRoleAsync(string role)
+        {
+            SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
+            SocketRole rolo;
+            Dictionary<string, SocketRole> guildRoles;
+            string rolelower = role.ToLower();
+
+            IEnumerable<string> userroles = user.Roles.Select(r => r.Name.ToLower());
+
+            _guildinfo.GuildRoles.TryGetValue(Context.Guild.Id, out guildRoles);
+
+            if (userroles.Contains(rolelower))
+            {
+                guildRoles.TryGetValue(rolelower, out rolo);
+                await user.RemoveRoleAsync(rolo);
+                await ReplyAsync($"{Context.User.Mention} Your roles have been updated.");
             }
             else
-            { 
-                guildRoles.TryGetValue(role.ToLower(), out rolo);
-                await user.AddRoleAsync(rolo);
+            {
+                await ReplyAsync($"{Context.User.Mention} You don't have that role. Did you spell it correctly?");
             }
-            
         }
     }
 }

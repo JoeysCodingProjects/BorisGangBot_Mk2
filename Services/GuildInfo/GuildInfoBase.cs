@@ -1,7 +1,5 @@
-﻿using System;
+﻿using Discord.WebSocket;
 using System.Collections.Generic;
-using System.Text;
-using Discord.WebSocket;
 
 namespace BorisGangBot_Mk2.Services.GuildInfo
 {

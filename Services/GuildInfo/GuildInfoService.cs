@@ -1,7 +1,6 @@
 ﻿using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BorisGangBot_Mk2.Services.GuildInfo
@@ -35,18 +34,15 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
             _discord.GuildUnavailable += ClearGuildRolesAsync;
             _discord.GuildAvailable += StoreGuildAsync;
             _discord.GuildAvailable += StoreGuildRolesAsync;
-            
+
         }
 
-        //
-        //
-        // Primary functions for GuildInfo
-        //
-        //
 
-        //
-        // Store/Clear guilds 
-        //
+        #region Primary functions for GuildInfo
+
+
+        #region Store/Clear guilds 
+
         private Task StoreGuildAsync(SocketGuild guild)
         {
             if (guild == null)
@@ -60,11 +56,12 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
             return Task.Run(() => Guilds.Remove(guild.Id));
         }
 
-        //
-        // Store/Clear Guild Roles
-        //
+        #endregion
+
+        #region Store/Clear Guild Roles
+
         private Task StoreGuildRolesAsync(SocketGuild guild)
-        { 
+        {
             IReadOnlyCollection<SocketRole> ROroles = guild.Roles;
             Dictionary<string, SocketRole> guildroles = CreateRoleDictionary(ROroles.GetEnumerator(), ROroles.Count);
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [Guild Info Service]: Successfully saved roles for the guild {guild.Name}");
@@ -76,11 +73,16 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
             return Task.Run(() => GuildRoles.Remove(guild.Id));
         }
 
-        //
-        //
-        // Secondary functions for Guild Info (Supporting Functions)
-        //
-        //
+        #endregion
+
+
+        #endregion
+
+
+        #region Secondary functions for Guild Info (Supporting Functions)
+
+
+        #region CreateRoleDictionary
 
         private Dictionary<string, SocketRole> CreateRoleDictionary(IEnumerator<SocketRole> guildRoles, int count)
         {
@@ -97,5 +99,9 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
 
             return roles;
         }
+
+        #endregion
+
+        #endregion
     }
 }

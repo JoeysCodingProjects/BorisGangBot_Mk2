@@ -1,21 +1,16 @@
-﻿using BorisGangBot_Mk2.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BorisGangBot_Mk2.Services;
+using BorisGangBot_Mk2.Services.GuildInfo;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
-using YamlDotNet.RepresentationModel;
-using YamlDotNet.Serialization;
-using System.IO;
-using BorisGangBot_Mk2.Services;
-using BorisGangBot_Mk2.Services.GuildInfo;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BorisGangBot_Mk2.Modules.BotAdminModules
 {
     [RequireOwner]
-    public class BotTestingModule:ModuleBase<SocketCommandContext>
+    public class BotTestingModule : ModuleBase<SocketCommandContext>
     {
         private IConfigurationRoot _config;
         private StreamMonoService _streams;
@@ -32,13 +27,16 @@ namespace BorisGangBot_Mk2.Modules.BotAdminModules
 
         [Command("randominfo")]
         [Summary("I still use print statements to test my code because im a naughty boy")]
-        public async Task SendRandomInfoAsync(string role)
+        public async Task SendRandomInfoAsync()
         {
-            SocketRole rolo;
-            Dictionary<string, SocketRole> roledict;
-            _guildinfo.GuildRoles.TryGetValue(Context.Guild.Id, out roledict);
-            roledict.TryGetValue(role, out rolo);
-            await ReplyAsync($"{rolo.ToString()}", false);
+            SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
+            IEnumerable<string> userroles = user.Roles.Select(r => r.Name);
+            string msg = "";
+            foreach (string r in userroles)
+            {
+                msg += " " + r;
+            }
+            await ReplyAsync(msg);
         }
     }
 }

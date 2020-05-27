@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Discord.Commands;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
 
 namespace BorisGangBot_Mk2.Modules
 {
@@ -15,13 +11,6 @@ namespace BorisGangBot_Mk2.Modules
         public async Task SourceAsync()
         {
             await ReplyAsync($"https://github.com/JoeysCodingProjects/BorisGangBot_Mk2");
-        }
-
-        [Command("todo")]
-        [Summary("Gives a link to Boris Gang Bot's ToDo list of planned additions.")]
-        public async Task ToDoAsync()
-        {
-            await ReplyAsync($"https://github.com/JoeysCodingProjects/BorisGangBot_Mk2/blob/master/README.md");
         }
     }
 }

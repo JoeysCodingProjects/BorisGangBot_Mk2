@@ -10,6 +10,7 @@ using TwitchLib.Api;
 using TwitchLib.Api.Helix.Models.Games;
 using TwitchLib.Api.Helix.Models.Streams;
 using TwitchLib.Api.Helix.Models.Users;
+using TwitchLib.Api.Interfaces;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
@@ -19,8 +20,8 @@ namespace BorisGangBot_Mk2.Services
 {
     public class StreamMonoService : LiveStreamMono.StreamMonoServiceBase
     {
-        private IConfigurationRoot _config;
-        private DiscordSocketClient _discord;
+        private readonly IConfigurationRoot _config;
+        private readonly DiscordSocketClient _discord;
         public LiveStreamMonitorService LiveStreamMonitor;
 
 
@@ -33,22 +34,26 @@ namespace BorisGangBot_Mk2.Services
 
 
             // Service update interval in seconds
-            UpdInt = 60;
-            
+            UpdInt = 30;
+
             // Name of channel to use when sending notifications
             NotifChannelName = "stream-updates";
 
-
+            // Assign twitch api credentials
+            TwitchAPI _api = new TwitchAPI();
+            _api.Settings.ClientId = _config["tokens:tw_cID"];
+            _api.Settings.AccessToken = _config["tokens:tw_token"];
+            TwAPI = _api;
         }
 
+        #region CreateStreamMonoAsync
         private async Task CreateStreamMonoAsync()
         {
             await Task.Run(() => GetStreamerList());
-            await Task.Run(() => CreateTwitchAPI());
 
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: GUILD COUNT {_discord.Guilds.Count}");
 
-            
+
             IEnumerator<SocketGuild> IEguilds = _discord.Guilds.GetEnumerator();
             IEguilds.MoveNext();
             while (IEguilds.Current != null)
@@ -59,7 +64,7 @@ namespace BorisGangBot_Mk2.Services
                 IEchannels.MoveNext();
                 while (currentPos != IEguilds.Current.TextChannels.Count - 1)
                 {
-                    currentPos = IEchannels.Current.Position;
+                    currentPos++;
                     if (IEchannels.Current.Name.Contains(NotifChannelName))
                     {
                         StreamNotifChannels.Add(IEchannels.Current);
@@ -67,6 +72,7 @@ namespace BorisGangBot_Mk2.Services
                     }
                     IEchannels.MoveNext();
                 }
+                currentPos = 0;
                 IEchannels.Dispose();
                 IEguilds.MoveNext();
             }
@@ -81,22 +87,37 @@ namespace BorisGangBot_Mk2.Services
                 Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService ERROR]: No Stream Update Notification channels were found!");
             }
 
-            LiveStreamMonitor = new LiveStreamMonitorService(TwAPI, UpdInt);
+            LiveStreamMonitor = new LiveStreamMonitorService(TwAPI, UpdInt, 100);
 
+            LiveStreamMonitor.OnServiceTick += LiveStreamMonitor_OnServiceTick;
             LiveStreamMonitor.OnChannelsSet += OnChannelsSetEvent;
             LiveStreamMonitor.OnServiceStarted += OnServiceStartedEvent;
             LiveStreamMonitor.OnStreamOnline += OnStreamOnlineEventAsync;
 
             LiveStreamMonitor.SetChannelsByName(StreamList);
+
             LiveStreamMonitor.Start();
+
+            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Was service enabled? - {LiveStreamMonitor.Enabled}");
         }
 
+        private void LiveStreamMonitor_OnServiceTick(object sender, OnServiceTickArgs e)
+        {
+            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} SERVICE TICK");
+        }
+
+        #endregion
+
+
+        #region Events
         // -----
         // Events
         // -----
+
         private void OnServiceStartedEvent(object sender, OnServiceStartedArgs e)
         {
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Live Stream Monitor Service started successfully.");
+            LiveStreamMonitor.UpdateLiveStreamersAsync();
         }
 
         private async void OnStreamOnlineEventAsync(object sender, OnStreamOnlineArgs e)
@@ -107,7 +128,7 @@ namespace BorisGangBot_Mk2.Services
             List<EmbedBuilder> eblist = BG_CreateStreamerEmbeds(streammodellist);
             foreach (SocketTextChannel x in StreamNotifChannels)
             {
-                foreach(EmbedBuilder z in eblist)
+                foreach (EmbedBuilder z in eblist)
                 {
                     await x.SendMessageAsync(null, false, z.Build());
                 }
@@ -138,17 +159,10 @@ namespace BorisGangBot_Mk2.Services
             StreamList = deserializer.Deserialize<List<string>>(result);
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: StreamerList Creation finished.");
         }
-        
-        private void CreateTwitchAPI()
-        {
-            TwitchAPI _twapi = new TwitchAPI();
-            _twapi.Settings.ClientId = _config["tokens:tw_cID"];
-            _twapi.Settings.AccessToken = _config["tokens:tw_token"];
 
-            TwAPI = _twapi;
-            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: TwitchAPI Creation finished.");
-        }
+        #endregion
 
+        #region Monitor Service Required Functions
         // -----
         // Monitor Service Required Functions
         // -----
@@ -176,12 +190,12 @@ namespace BorisGangBot_Mk2.Services
                 s_live.Add(x.UserName);
             }
 
-            if (s_response.Streams.Length == 0) 
-            { 
+            if (s_response.Streams.Length == 0)
+            {
                 return streamModels;
             }
 
-            u_response = await TwAPI.Helix.Users.GetUsersAsync(null, s_live, "hb5w0knsvqeefe73hhho6kbq7tu9x4");
+            u_response = await TwAPI.Helix.Users.GetUsersAsync(null, s_live, _config["tokens:tw_token"]);
 
             for (int i = 0; i < s_response.Streams.Length; i++)
             {
@@ -261,14 +275,19 @@ namespace BorisGangBot_Mk2.Services
             return eb_list;
         }
 
+        #endregion
+
+        #region General Purpose Functions
         // -----
         // General Purpose Functions
         // -----
-        public async Task<bool> TryUpdateStreamFileAsync(string streamer)
-        {
-            bool fileupdated = false;
+        //public async Task<bool> TryUpdateStreamFileAsync(string streamer)
+        //{
+        //    bool fileupdated = false;
 
-            return fileupdated;
-        }
+        //    return fileupdated;
+        //}
+
+        #endregion
     }
 }

@@ -37,7 +37,9 @@ namespace BorisGangBot_Mk2.Services
 
         public async Task StartAsync()
         {
-            string discordToken = _config["tokens:discord"]; // Get the discord token from config
+            //string discordToken = _config["tokens:discord"]; // Token used by Released bot
+            string discordToken = _config["tokens:discord_testing"]; // Token used by seperate dev version of bot
+
             if (string.IsNullOrWhiteSpace(discordToken))
             {
                 throw new Exception("Please enter your bot's token into the '_configuration.json' file");
@@ -48,6 +50,7 @@ namespace BorisGangBot_Mk2.Services
 
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _provider); // Load commands and modules into the command service
 
+            await _discord.SetGameAsync(";h for info", null, ActivityType.Listening);
         }
     }
 }
