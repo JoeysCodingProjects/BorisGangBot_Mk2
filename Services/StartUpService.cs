@@ -37,8 +37,8 @@ namespace BorisGangBot_Mk2.Services
 
         public async Task StartAsync()
         {
-            //string discordToken = _config["tokens:discord"]; // Token used by Released bot
-            string discordToken = _config["tokens:discord_testing"]; // Token used by seperate dev version of bot
+            string discordToken = _config["tokens:discord"]; // Token used by Released bot
+            //string discordToken = _config["tokens:discord_testing"]; // Token used by seperate dev version of bot
 
             if (string.IsNullOrWhiteSpace(discordToken))
             {
