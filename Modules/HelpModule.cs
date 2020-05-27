@@ -2,6 +2,8 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
@@ -13,27 +15,35 @@ namespace BorisGangBot_Mk2.Modules
     {
         private readonly CommandService _service;
         private readonly IConfigurationRoot _config;
+        private readonly DiscordSocketClient _discord;
 
-        public HelpModule(CommandService service, IConfigurationRoot config)
+        public HelpModule(CommandService service,
+            IConfigurationRoot config,
+            DiscordSocketClient discord)
         {
             _service = service;
             _config = config;
+            _discord = discord;
         }
+
 
         #region Help Command General
         [Command("help")]
+        [Alias("h")]
         [Summary("Lists the available commands for Boris Gang Bot.")]
         public async Task HelpAsync()
         {
             string prefix = _config["prefix"];
             var author = new EmbedAuthorBuilder()
-            { 
-                Name = "BorisGang Bot Commands"
+            {
+                Name = _discord.CurrentUser.Username,
+                IconUrl = _discord.CurrentUser.GetAvatarUrl()
             };
             var builder = new EmbedBuilder()
             {
                 Title = "Below is a list of available commands:",
-                Color = new Color(62, 33, 210)
+                Color = new Color(62, 33, 210),
+                Author = author
                 
             };
 
@@ -53,7 +63,7 @@ namespace BorisGangBot_Mk2.Modules
                 {
                     builder.AddField(x =>
                     {
-                        x.Name = module.Name;
+                        x.Name = $"\n\n```{module.Name}```";
                         x.Value = description;
                         x.IsInline = false;
                     });
@@ -65,8 +75,8 @@ namespace BorisGangBot_Mk2.Modules
         #endregion
 
         #region Help Command Specific
-        [Command("help")]
-        [Summary("Add a command to the end to get more information about it.")]
+        //[Command("help")]
+        //[Summary("Add a command to the end to get more information about it.")]
         public async Task HelpAsync(string command)
         {
             var result = _service.Search(Context, command);

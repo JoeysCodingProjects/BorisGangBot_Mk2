@@ -50,6 +50,7 @@ namespace BorisGangBot_Mk2.Services
 
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _provider); // Load commands and modules into the command service
 
+            await _discord.SetGameAsync(";h for info", null, ActivityType.Listening);
         }
     }
 }
