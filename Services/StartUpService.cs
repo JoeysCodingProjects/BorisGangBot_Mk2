@@ -42,7 +42,7 @@ namespace BorisGangBot_Mk2.Services
 
             if (string.IsNullOrWhiteSpace(discordToken))
             {
-                throw new Exception("Please enter your bot's token into the '_configuration.json' file");
+                throw new Exception("Please enter bot token into the '_config.yaml' file");
             }
 
             await _discord.LoginAsync(TokenType.Bot, discordToken);
