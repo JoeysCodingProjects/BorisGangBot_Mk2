@@ -20,7 +20,7 @@ namespace BorisGangBot_Mk2.Helpers
         // This is the ID of the Direct Message channel between the bot
         // and it's owner. Used to make sending owner important updates easier.
         // NOTE: YOU MUST MESSAGE THE BOT ANY TIME IT RESTARTS TO CREATE THE DMCHANNEL
-        private ulong dm_channel_id = 715021847099605050; //687034508477726748;
+        private ulong dm_channel_id = 687034508477726748;
 
 
 
@@ -66,7 +66,6 @@ namespace BorisGangBot_Mk2.Helpers
             {
                 return;
             }
-            await _discord.GetUser(203229820518268928).SendMessageAsync(sb.ToString());
             await dmchannel.SendMessageAsync(sb.ToString());
         }
         #endregion

@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BorisGangBot_Mk2.Modules.BotAdminModules
@@ -28,11 +29,14 @@ namespace BorisGangBot_Mk2.Modules.BotAdminModules
         [Summary("I still use print statements to test my code because im a naughty boy")]
         public async Task SendRandomInfoAsync()
         {
-            foreach (var x in _streams.StreamEmbeds)
+            SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
+            IEnumerable<string> userroles = user.Roles.Select(r => r.Name);
+            string msg = "";
+            foreach (string r in userroles)
             {
-                await _streams.LiveStreamMonitor.UpdateLiveStreamersAsync();
-                //await ReplyAsync("", false, x.Build());
+                msg += " " + r;
             }
+            await ReplyAsync(msg);
         }
     }
 }

@@ -55,7 +55,7 @@ namespace BorisGangBot_Mk2.Services
                     {
                         MessageOwnerHelper moh = new MessageOwnerHelper(_discord);
                         await moh.MessageOwnerAsync(msg, result.ErrorReason.ToString());
-                        await context.Channel.SendMessageAsync("Command failed. Notifying Owner.");
+                        await context.Channel.SendMessageAsync(result.ErrorReason.ToString());
                     }
                 }
             }
