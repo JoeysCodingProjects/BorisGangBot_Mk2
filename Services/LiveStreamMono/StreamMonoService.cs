@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using TwitchLib.Api;
 using TwitchLib.Api.Helix.Models.Games;
@@ -14,6 +15,7 @@ using TwitchLib.Api.Interfaces;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
+using TwitchLib.Api.V5.Models.Streams;
 using YamlDotNet.Serialization;
 
 namespace BorisGangBot_Mk2.Services
@@ -49,11 +51,12 @@ namespace BorisGangBot_Mk2.Services
         #region CreateStreamMonoAsync
         private async Task CreateStreamMonoAsync()
         {
+            StreamModels = new Dictionary<string, StreamModel>();
             await Task.Run(() => GetStreamerList());
 
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: GUILD COUNT {_discord.Guilds.Count}");
 
-
+            List<SocketTextChannel> notifChannels = new List<SocketTextChannel>();
             IEnumerator<SocketGuild> IEguilds = _discord.Guilds.GetEnumerator();
             IEguilds.MoveNext();
             while (IEguilds.Current != null)
@@ -67,7 +70,7 @@ namespace BorisGangBot_Mk2.Services
                     currentPos++;
                     if (IEchannels.Current.Name.Contains(NotifChannelName))
                     {
-                        StreamNotifChannels.Add(IEchannels.Current);
+                        notifChannels.Add(IEchannels.Current);
                         break;
                     }
                     IEchannels.MoveNext();
@@ -78,6 +81,8 @@ namespace BorisGangBot_Mk2.Services
             }
             IEguilds.Dispose();
 
+            StreamNotifChannels = notifChannels;
+
             if (StreamNotifChannels.Count != 0)
             {
                 Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Successfully collected Stream Update Notification channels.");
@@ -87,11 +92,14 @@ namespace BorisGangBot_Mk2.Services
                 Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService ERROR]: No Stream Update Notification channels were found!");
             }
 
+            StreamProfileImages = await GetProfImgUrlsAsync(StreamList);
+
             LiveStreamMonitor = new LiveStreamMonitorService(TwAPI, UpdInt, 100);
 
             LiveStreamMonitor.OnServiceTick += LiveStreamMonitor_OnServiceTick;
             LiveStreamMonitor.OnChannelsSet += OnChannelsSetEvent;
             LiveStreamMonitor.OnServiceStarted += OnServiceStartedEvent;
+            LiveStreamMonitor.OnServiceStopped += OnServiceStoppedEvent;
             LiveStreamMonitor.OnStreamOnline += OnStreamOnlineEventAsync;
 
             LiveStreamMonitor.SetChannelsByName(StreamList);
@@ -99,11 +107,6 @@ namespace BorisGangBot_Mk2.Services
             LiveStreamMonitor.Start();
 
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Was service enabled? - {LiveStreamMonitor.Enabled}");
-        }
-
-        private void LiveStreamMonitor_OnServiceTick(object sender, OnServiceTickArgs e)
-        {
-            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} SERVICE TICK");
         }
 
         #endregion
@@ -114,24 +117,36 @@ namespace BorisGangBot_Mk2.Services
         // Events
         // -----
 
+        private void LiveStreamMonitor_OnServiceTick(object sender, OnServiceTickArgs e)
+        {
+            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} SERVICE TICK");
+        }
+
         private void OnServiceStartedEvent(object sender, OnServiceStartedArgs e)
         {
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Live Stream Monitor Service started successfully.");
-            LiveStreamMonitor.UpdateLiveStreamersAsync();
+        }
+
+        private void OnServiceStoppedEvent(object sender, OnServiceStoppedArgs e)
+        {
+            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Live Stream Monitor Service has been stopped.");
         }
 
         private async void OnStreamOnlineEventAsync(object sender, OnStreamOnlineArgs e)
         {
-            List<string> dumbylist = new List<string>();
-            dumbylist.Add(e.Channel);
-            List<StreamModel> streammodellist = await UpdateLiveStreamModelsAsync(dumbylist);
-            List<EmbedBuilder> eblist = BG_CreateStreamerEmbeds(streammodellist);
+            List<string> gameTemp = new List<string>
+            {
+                e.Stream.GameId
+            };
+
+            GetGamesResponse getGamesResponse = await TwAPI.Helix.Games.GetGamesAsync(gameTemp);
+
+            UpdateLiveStreamModelsAsync(e.Channel.ToLower(), e.Stream, getGamesResponse);
+            Console.Out.WriteLine(StreamModels.Keys.Contains(e.Channel) + " " + e.Channel + " " + e.Stream.UserName);
+            CreateStreamerEmbed(StreamModels[e.Stream.UserName]);
             foreach (SocketTextChannel x in StreamNotifChannels)
             {
-                foreach (EmbedBuilder z in eblist)
-                {
-                    await x.SendMessageAsync(null, false, z.Build());
-                }
+                await x.SendMessageAsync(null, false, StreamEmbeds[e.Stream.UserName].Build());
             }
         }
 
@@ -167,112 +182,96 @@ namespace BorisGangBot_Mk2.Services
         // Monitor Service Required Functions
         // -----
 
-        public async Task<List<StreamModel>> UpdateLiveStreamModelsAsync(List<string> streamToModel)
+        private void UpdateLiveStreamModelsAsync(string streamToModel, TwitchLib.Api.Helix.Models.Streams.Stream twStream, GetGamesResponse gamesResponse)
         {
+            List<string> gameIdTemp = new List<string> { twStream.GameId };
 
-            // Key = GameID, Value = Game Name
-            Dictionary<string, string> g_dictionary = new Dictionary<string, string>();
+            string gameName = gamesResponse.Games.Length != 0 ? gamesResponse.Games[0].Name : null;
 
-            GetGamesResponse g_response = new GetGamesResponse();
-            GetStreamsResponse s_response = new GetStreamsResponse();
-            GetUsersResponse u_response = new GetUsersResponse();
-
-            List<string> g_IDs = new List<string>();
-            List<string> s_live = new List<string>();
-            List<StreamModel> streamModels = new List<StreamModel>();
-
-            s_response = await TwAPI.Helix.Streams.GetStreamsAsync(null, null, streamToModel.Count, null, null, "all", null, streamToModel);
-            foreach (TwitchLib.Api.Helix.Models.Streams.Stream x in s_response.Streams)
-            {
-                // Only get the avatars of streams that are live
-                // Not doing this results in getting all streamer
-                // avatars and assigning them to the wrong streamer
-                s_live.Add(x.UserName);
+            if (StreamModels.ContainsKey(streamToModel))
+            { // Just update Title, Game, and Viewers
+                StreamModels[streamToModel].Game = gameName;
+                StreamModels[streamToModel].Title = twStream.Title;
+                StreamModels[streamToModel].Viewers = twStream.ViewerCount;
+                return;
             }
 
-            if (s_response.Streams.Length == 0)
+            StreamModel streamModel = new StreamModel()
             {
-                return streamModels;
-            }
+                Stream = twStream.UserName,
+                Avatar = StreamProfileImages[streamToModel],
+                Title = twStream.Title,
+                Game = gameName,
+                Viewers = twStream.ViewerCount,
+                Link = $"https://www.twitch.tv/{twStream.UserName}"
+            };
 
-            u_response = await TwAPI.Helix.Users.GetUsersAsync(null, s_live, _config["tokens:tw_token"]);
-
-            for (int i = 0; i < s_response.Streams.Length; i++)
-            {
-                StreamModel stream_daddy = new StreamModel()
-                {
-                    Stream = s_response.Streams[i].UserName,
-                    Avatar = u_response.Users[i].ProfileImageUrl,
-                    Title = s_response.Streams[i].Title,
-                    Game = s_response.Streams[i].GameId,
-                    Viewers = s_response.Streams[i].ViewerCount,
-                    Link = $"https://www.twitch.tv/{s_response.Streams[i].UserName}"
-                };
-                streamModels.Add(stream_daddy);
-
-                if (!g_IDs.Contains(stream_daddy.Game)) { g_IDs.Add(stream_daddy.Game); }
-            }
-
-            g_response = await TwAPI.Helix.Games.GetGamesAsync(g_IDs, null);
-
-            foreach (TwitchLib.Api.Helix.Models.Games.Game x in g_response.Games)
-            {
-                g_dictionary.TryAdd(x.Id, x.Name);
-            }
-
-            string temp;
-            foreach (StreamModel x in streamModels)
-            {
-                g_dictionary.TryGetValue(x.Game, out temp);
-                x.Game = temp;
-            }
-
-            return streamModels;
+            StreamModels.Add(streamModel.Stream, streamModel);
         }
 
-        public List<EmbedBuilder> BG_CreateStreamerEmbeds(List<StreamModel> streamModels)
+        private async Task<Dictionary<string, string>> GetProfImgUrlsAsync(List<string> streams)
         {
-            List<EmbedBuilder> eb_list = new List<EmbedBuilder>();
+            Dictionary<string, string> profImages = new Dictionary<string, string>();
 
-            foreach (StreamModel sm in streamModels)
+            GetUsersResponse usersResponse = await TwAPI.Helix.Users.GetUsersAsync(null, streams, TwAPI.Settings.AccessToken);
+
+            foreach (var user in usersResponse.Users)
             {
-                var a = new EmbedAuthorBuilder()
-                {
-                    Name = sm.Stream,
-                    IconUrl = sm.Avatar
-                };
-                var eb = new EmbedBuilder()
-                {
-                    Author = a,
-                    Color = new Color(0, 200, 0),
-                    ThumbnailUrl = sm.Avatar,
-                    Title = sm.Title,
-                    Url = sm.Link
-                };
-                eb.AddField(x =>
-                {
-                    x.IsInline = true;
-                    x.Name = "**Playing:**";
-                    if (sm.Game == null)
-                    {
-                        x.Value = "Unknown";
-                    }
-                    else
-                    {
-                        x.Value = sm.Game;
-                    }
-                });
-                eb.AddField(x =>
-                {
-                    x.IsInline = true;
-                    x.Name = "**Viewers:**";
-                    x.Value = sm.Viewers;
-                });
-
-                eb_list.Add(eb);
+                profImages.Add(user.Login, user.ProfileImageUrl);
             }
 
-            return eb_list;
+            return profImages;
+        }
+
+        public void CreateStreamerEmbed(StreamModel streamModel)
+        {
+            if (StreamEmbeds.ContainsKey(streamModel.Stream))
+            {
+                EmbedBuilder embed = StreamEmbeds[streamModel.Stream.ToLower()];
+
+                embed.Title = streamModel.Title;
+                embed.Fields[0].Value = streamModel.Game != null ? streamModel.Game : "Unknown";
+                embed.Fields[1].Value = streamModel.Viewers;
+
+                StreamEmbeds[streamModel.Stream.ToLower()] = embed;
+                return;
+            }
+
+            
+            var a = new EmbedAuthorBuilder()
+            {
+                Name = streamModel.Stream,
+                IconUrl = streamModel.Avatar
+            };
+            var eb = new EmbedBuilder()
+            {
+                Author = a,
+                Color = new Color(0, 200, 0),
+                ThumbnailUrl = streamModel.Avatar,
+                Title = streamModel.Title,
+                Url = streamModel.Link
+            };
+            eb.AddField(x =>
+            {
+                x.IsInline = true;
+                x.Name = "**Playing:**";
+                if (streamModel.Game == null)
+                {
+                    x.Value = "Unknown";
+                }
+                else
+                {
+                    x.Value = streamModel.Game;
+                }
+            });
+            eb.AddField(x =>
+            {
+                x.IsInline = true;
+                x.Name = "**Viewers:**";
+                x.Value = streamModel.Viewers;
+            });
+
+            StreamEmbeds.Add(streamModel.Stream, eb);
         }
 
         #endregion

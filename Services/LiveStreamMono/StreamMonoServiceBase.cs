@@ -29,11 +29,13 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             set { _streamlist = value; }
         }
 
-        public List<StreamModel> StreamModels { get; set; }
+        public Dictionary<string, StreamModel> StreamModels { get; set; }
 
-        public List<EmbedBuilder> StreamEmbeds { get; set; }
+        public Dictionary<string, string> StreamProfileImages { get; set; }
 
-        public List<SocketTextChannel> StreamNotifChannels = new List<SocketTextChannel>();
+        public Dictionary<string, EmbedBuilder> StreamEmbeds = new Dictionary<string, EmbedBuilder>();
+
+        public List<SocketTextChannel> StreamNotifChannels { get; set; }
 
         public string NotifChannelName { get; protected set; }
     }
