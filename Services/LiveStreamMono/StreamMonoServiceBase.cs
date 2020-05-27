@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using BorisGangBot_Mk2.Models;
+﻿using BorisGangBot_Mk2.Models;
 using Discord;
 using Discord.WebSocket;
-using TwitchLib.Api.Interfaces;
+using System.Collections.Generic;
+using TwitchLib.Api;
 
 namespace BorisGangBot_Mk2.Services.LiveStreamMono
 {
@@ -14,7 +12,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         private List<string> _streamlist;
 
         // Twitch API
-        public ITwitchAPI TwAPI { get; protected set; }
+        public TwitchAPI TwAPI = new TwitchAPI();
 
         // Timer Update Interval in milliseconds
         public int UpdInt

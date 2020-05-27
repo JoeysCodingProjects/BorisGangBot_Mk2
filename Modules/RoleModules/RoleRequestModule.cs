@@ -28,14 +28,15 @@ namespace BorisGangBot_Mk2.Modules.RoleModules
             SocketRole rolo;
             Dictionary<string, SocketRole> guildRoles;
             string userroles = user.Roles.GetEnumerator().ToString().ToLower();
+            string rolelower = role.ToLower();
 
             _guildinfo.GuildRoles.TryGetValue(Context.Guild.Id, out guildRoles);
 
-            if (userroles.Contains(role))
+            if (userroles.Contains(rolelower))
             {
                 await ReplyAsync($"You are already assigned the role {role}.");
             }
-            else if (!(_guildinfo.RoleMeEnabledRoles.Contains(role.ToLower())))
+            else if (!(_guildinfo.RoleMeEnabledRoles.Contains(rolelower)))
             {
                 await ReplyAsync("Invalid role. Either it doesn't exist or you aren't allowed to self assign it.");
             }
@@ -43,12 +44,12 @@ namespace BorisGangBot_Mk2.Modules.RoleModules
             {
                 guildRoles.TryGetValue("borisgoon", out rolo);
                 await user.AddRoleAsync(rolo);
-                guildRoles.TryGetValue(role.ToLower(), out rolo);
+                guildRoles.TryGetValue(rolelower, out rolo);
                 await user.AddRoleAsync(rolo);
             }
             else
             { 
-                guildRoles.TryGetValue(role.ToLower(), out rolo);
+                guildRoles.TryGetValue(rolelower, out rolo);
                 await user.AddRoleAsync(rolo);
             }
             

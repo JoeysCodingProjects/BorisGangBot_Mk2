@@ -10,6 +10,7 @@ using TwitchLib.Api;
 using TwitchLib.Api.Helix.Models.Games;
 using TwitchLib.Api.Helix.Models.Streams;
 using TwitchLib.Api.Helix.Models.Users;
+using TwitchLib.Api.Interfaces;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
@@ -33,19 +34,21 @@ namespace BorisGangBot_Mk2.Services
 
 
             // Service update interval in seconds
-            UpdInt = 60;
+            UpdInt = 30;
 
             // Name of channel to use when sending notifications
             NotifChannelName = "stream-updates";
 
-
+            TwAPI.Settings.ClientId = _config["tokens:tw_cID"];
+            TwAPI.Settings.AccessToken = _config["tokens:tw_token"];
         }
 
         #region CreateStreamMonoAsync
         private async Task CreateStreamMonoAsync()
         {
             await Task.Run(() => GetStreamerList());
-            await Task.Run(() => CreateTwitchAPI());
+            
+            
 
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: GUILD COUNT {_discord.Guilds.Count}");
 
@@ -85,12 +88,20 @@ namespace BorisGangBot_Mk2.Services
 
             LiveStreamMonitor = new LiveStreamMonitorService(TwAPI, UpdInt);
 
+            LiveStreamMonitor.OnServiceTick += LiveStreamMonitor_OnServiceTick;
             LiveStreamMonitor.OnChannelsSet += OnChannelsSetEvent;
             LiveStreamMonitor.OnServiceStarted += OnServiceStartedEvent;
             LiveStreamMonitor.OnStreamOnline += OnStreamOnlineEventAsync;
 
             LiveStreamMonitor.SetChannelsByName(StreamList);
             LiveStreamMonitor.Start();
+
+            Console.Out.WriteLine(LiveStreamMonitor.Enabled);
+        }
+
+        private void LiveStreamMonitor_OnServiceTick(object sender, OnServiceTickArgs e)
+        {
+            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} SERVICE TICK");
         }
 
         #endregion
@@ -100,6 +111,7 @@ namespace BorisGangBot_Mk2.Services
         // -----
         // Events
         // -----
+
         private void OnServiceStartedEvent(object sender, OnServiceStartedArgs e)
         {
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Live Stream Monitor Service started successfully.");
@@ -143,16 +155,6 @@ namespace BorisGangBot_Mk2.Services
 
             StreamList = deserializer.Deserialize<List<string>>(result);
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: StreamerList Creation finished.");
-        }
-
-        private void CreateTwitchAPI()
-        {
-            TwitchAPI _twapi = new TwitchAPI();
-            _twapi.Settings.ClientId = _config["tokens:tw_cID"];
-            _twapi.Settings.AccessToken = _config["tokens:tw_token"];
-
-            TwAPI = _twapi;
-            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: TwitchAPI Creation finished.");
         }
 
         #endregion

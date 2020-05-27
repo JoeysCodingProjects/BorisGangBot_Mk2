@@ -1,16 +1,18 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 
 namespace BorisGangBot_Mk2.Modules
 {
+    [Name("Help Command")]
     public class HelpModule : ModuleBase<SocketCommandContext>
     {
         private readonly CommandService _service;
         private readonly IConfigurationRoot _config;
-
 
         public HelpModule(CommandService service, IConfigurationRoot config)
         {
@@ -24,14 +26,21 @@ namespace BorisGangBot_Mk2.Modules
         public async Task HelpAsync()
         {
             string prefix = _config["prefix"];
+            var author = new EmbedAuthorBuilder()
+            { 
+                Name = "BorisGang Bot Commands"
+            };
             var builder = new EmbedBuilder()
             {
-                Color = new Color(255, 165, 0),
-                Description = "These are the commands you can use."
+                Title = "Below is a list of available commands:",
+                Color = new Color(62, 33, 210)
+                
             };
 
             foreach (var module in _service.Modules)
             {
+                if (module.Preconditions.Count > 0)
+                        continue;
                 string description = null;
                 foreach (var cmd in module.Commands)
                 {

@@ -1,10 +1,13 @@
 ﻿using BorisGangBot_Mk2.Helpers;
 using Discord.Commands;
+using Microsoft.VisualBasic;
 using System;
 using System.Threading.Tasks;
 
 namespace BorisGangBot_Mk2.Modules.BGMembersModules
 {
+    [Name("Manage Streamers")]
+    [HideModuleName]
     [RequireUserPermission(Discord.GuildPermission.Administrator)]
     public class AddStreamerModule : ModuleBase<SocketCommandContext>
     {

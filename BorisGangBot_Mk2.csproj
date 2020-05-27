@@ -14,10 +14,11 @@
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.2" />
-    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.4" />
+    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="TwitchLib" Version="3.1.0" />
+    <PackageReference Include="TwitchLib" Version="3.1.1" />
+    <PackageReference Include="VS.Redist.Common.NetCore.HostFXR.x64.2.1" Version="2.1.17" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,9 +29,6 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Compile>
     <Compile Update="Modules\HelpModule.cs">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Compile>
-    <Compile Update="Modules\LiveModule.cs">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Compile>
     <Compile Update="Modules\MiscModule.cs">
@@ -66,6 +64,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Media\Images\" />
     <Folder Include="Modules\FunnyModules\" />
     <Folder Include="Modules\MembersModules\" />
     <Folder Include="Preconditions\" />
