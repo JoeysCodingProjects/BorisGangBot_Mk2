@@ -39,16 +39,17 @@ namespace BorisGangBot_Mk2.Services
             // Name of channel to use when sending notifications
             NotifChannelName = "stream-updates";
 
-            TwAPI.Settings.ClientId = _config["tokens:tw_cID"];
-            TwAPI.Settings.AccessToken = _config["tokens:tw_token"];
+            // Assign twitch api credentials
+            TwitchAPI _api = new TwitchAPI();
+            _api.Settings.ClientId = _config["tokens:tw_cID"];
+            _api.Settings.AccessToken = _config["tokens:tw_token"];
+            TwAPI = _api;
         }
 
         #region CreateStreamMonoAsync
         private async Task CreateStreamMonoAsync()
         {
             await Task.Run(() => GetStreamerList());
-            
-            
 
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: GUILD COUNT {_discord.Guilds.Count}");
 
@@ -86,7 +87,7 @@ namespace BorisGangBot_Mk2.Services
                 Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService ERROR]: No Stream Update Notification channels were found!");
             }
 
-            LiveStreamMonitor = new LiveStreamMonitorService(TwAPI, UpdInt);
+            LiveStreamMonitor = new LiveStreamMonitorService(TwAPI, UpdInt, 100);
 
             LiveStreamMonitor.OnServiceTick += LiveStreamMonitor_OnServiceTick;
             LiveStreamMonitor.OnChannelsSet += OnChannelsSetEvent;
@@ -94,9 +95,10 @@ namespace BorisGangBot_Mk2.Services
             LiveStreamMonitor.OnStreamOnline += OnStreamOnlineEventAsync;
 
             LiveStreamMonitor.SetChannelsByName(StreamList);
+
             LiveStreamMonitor.Start();
 
-            Console.Out.WriteLine(LiveStreamMonitor.Enabled);
+            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Was service enabled? - {LiveStreamMonitor.Enabled}");
         }
 
         private void LiveStreamMonitor_OnServiceTick(object sender, OnServiceTickArgs e)
@@ -115,6 +117,7 @@ namespace BorisGangBot_Mk2.Services
         private void OnServiceStartedEvent(object sender, OnServiceStartedArgs e)
         {
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Live Stream Monitor Service started successfully.");
+            LiveStreamMonitor.UpdateLiveStreamersAsync();
         }
 
         private async void OnStreamOnlineEventAsync(object sender, OnStreamOnlineArgs e)
@@ -278,12 +281,12 @@ namespace BorisGangBot_Mk2.Services
         // -----
         // General Purpose Functions
         // -----
-        public async Task<bool> TryUpdateStreamFileAsync(string streamer)
-        {
-            bool fileupdated = false;
+        //public async Task<bool> TryUpdateStreamFileAsync(string streamer)
+        //{
+        //    bool fileupdated = false;
 
-            return fileupdated;
-        }
+        //    return fileupdated;
+        //}
 
         #endregion
     }

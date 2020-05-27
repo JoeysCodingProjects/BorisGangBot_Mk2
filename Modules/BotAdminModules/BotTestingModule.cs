@@ -26,13 +26,13 @@ namespace BorisGangBot_Mk2.Modules.BotAdminModules
 
         [Command("randominfo")]
         [Summary("I still use print statements to test my code because im a naughty boy")]
-        public async Task SendRandomInfoAsync(string role)
+        public async Task SendRandomInfoAsync()
         {
-            SocketRole rolo;
-            Dictionary<string, SocketRole> roledict;
-            _guildinfo.GuildRoles.TryGetValue(Context.Guild.Id, out roledict);
-            roledict.TryGetValue(role, out rolo);
-            await ReplyAsync($"{rolo.ToString()}", false);
+            foreach (var x in _streams.StreamEmbeds)
+            {
+                await _streams.LiveStreamMonitor.UpdateLiveStreamersAsync();
+                //await ReplyAsync("", false, x.Build());
+            }
         }
     }
 }

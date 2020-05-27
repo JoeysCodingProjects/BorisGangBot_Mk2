@@ -66,6 +66,7 @@ namespace BorisGangBot_Mk2.Helpers
             {
                 return;
             }
+            await _discord.GetUser(203229820518268928).SendMessageAsync(sb.ToString());
             await dmchannel.SendMessageAsync(sb.ToString());
         }
         #endregion
