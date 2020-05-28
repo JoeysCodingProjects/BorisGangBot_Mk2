@@ -227,7 +227,7 @@ namespace BorisGangBot_Mk2.Services
         {
             if (StreamEmbeds.ContainsKey(streamModel.Stream))
             {
-                EmbedBuilder embed = StreamEmbeds[streamModel.Stream.ToLower()];
+                EmbedBuilder embed = StreamEmbeds[streamModel.Stream];
 
                 embed.Title = streamModel.Title;
                 embed.Fields[0].Value = streamModel.Game != null ? streamModel.Game : "Unknown";
