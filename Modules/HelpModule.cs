@@ -49,7 +49,7 @@ namespace BorisGangBot_Mk2.Modules
 
             foreach (var module in _service.Modules)
             {
-                if (module.Preconditions.Count > 0)
+                if (module.Group == "admin")
                         continue;
                 string description = null;
                 foreach (var cmd in module.Commands)

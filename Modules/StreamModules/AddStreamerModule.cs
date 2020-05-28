@@ -1,14 +1,12 @@
 ﻿using BorisGangBot_Mk2.Helpers;
 using Discord.Commands;
-using Microsoft.VisualBasic;
 using System;
 using System.Threading.Tasks;
 
-namespace BorisGangBot_Mk2.Modules.BGMembersModules
+namespace BorisGangBot_Mk2.Modules.StreamModules
 {
     [Name("Manage Streamers")]
-    [HideModuleName]
-    [RequireUserPermission(Discord.GuildPermission.Administrator)]
+    [RequireUserPermission(Discord.GuildPermission.ManageRoles)]
     public class AddStreamerModule : ModuleBase<SocketCommandContext>
     {
         public AddStreamerModule()
@@ -22,8 +20,7 @@ namespace BorisGangBot_Mk2.Modules.BGMembersModules
 
         #region AddStreamerAsync
         [Command("addstreamer")]
-        [Summary("Manually add a streamer to the list of streamers.")]
-        [RequireUserPermission(Discord.GuildPermission.Administrator)]
+        [Summary("Manually add a streamer to the list of streamers. Must have the \"Manage Roles\" permission.")]
         public async Task AddStreamerAsync(string streamer)
         {
             StreamerFileHelper addStreamer = new StreamerFileHelper();
@@ -54,8 +51,7 @@ namespace BorisGangBot_Mk2.Modules.BGMembersModules
 
         #region RemoveStreamerAsync
         [Command("removestreamer")]
-        [Summary("Removes the mentioned streamer from the list.")]
-        [RequireUserPermission(Discord.GuildPermission.Administrator)]
+        [Summary("Removes the mentioned streamer from the list. Must have the \"Manage Roles\" permission.")]
         public async Task RemoveStreamerAsync(string streamer)
         {
             StreamerFileHelper sfh = new StreamerFileHelper();

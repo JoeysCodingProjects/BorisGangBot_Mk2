@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 namespace BorisGangBot_Mk2.Modules.BotAdminModules
 {
     [RequireOwner]
+    [RequireUserPermission(Discord.GuildPermission.Administrator)]
+    [Group("admin")]
     public class BotTestingModule : ModuleBase<SocketCommandContext>
     {
         private IConfigurationRoot _config;
