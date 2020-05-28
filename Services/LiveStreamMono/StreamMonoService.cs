@@ -96,7 +96,7 @@ namespace BorisGangBot_Mk2.Services
 
             LiveStreamMonitor = new LiveStreamMonitorService(TwAPI, UpdInt, 100);
 
-            LiveStreamMonitor.OnServiceTick += LiveStreamMonitor_OnServiceTick;
+            //LiveStreamMonitor.OnServiceTick += LiveStreamMonitor_OnServiceTick;
             LiveStreamMonitor.OnChannelsSet += OnChannelsSetEvent;
             LiveStreamMonitor.OnServiceStarted += OnServiceStartedEvent;
             LiveStreamMonitor.OnServiceStopped += OnServiceStoppedEvent;
