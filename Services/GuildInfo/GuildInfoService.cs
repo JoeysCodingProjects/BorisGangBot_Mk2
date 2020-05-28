@@ -15,20 +15,6 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
 
             Guilds = new Dictionary<ulong, SocketGuild>();
             GuildRoles = new Dictionary<ulong, Dictionary<string, SocketRole>>();
-            RoleMeEnabledRoles = new List<string>();
-
-            //
-            // I know how ugly this is but it's late
-            // don't judge me.
-            //
-
-            RoleMeEnabledRoles.Add("streamer");
-            RoleMeEnabledRoles.Add("beggtionary");
-            RoleMeEnabledRoles.Add("queen");
-            RoleMeEnabledRoles.Add("mustache");
-            RoleMeEnabledRoles.Add("forehead");
-            RoleMeEnabledRoles.Add("smol");
-            RoleMeEnabledRoles.Add("borisgoon");
 
             _discord.GuildUnavailable += ClearGuildAsync;
             _discord.GuildUnavailable += ClearGuildRolesAsync;
@@ -47,6 +33,7 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
         {
             if (guild == null)
                 return Task.Run(() => Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh: mm:ss")} [Guild Info Service ERROR]: Guild returned NULL."));
+            
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [Guild Info Service]: Successfully saved info for the guild {guild.Name}");
             return Task.Run(() => Guilds.Add(guild.Id, guild));
         }
@@ -62,8 +49,8 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
 
         private Task StoreGuildRolesAsync(SocketGuild guild)
         {
-            IReadOnlyCollection<SocketRole> ROroles = guild.Roles;
-            Dictionary<string, SocketRole> guildroles = CreateRoleDictionary(ROroles.GetEnumerator(), ROroles.Count);
+            IReadOnlyCollection<SocketRole> rolesCollection = guild.Roles;
+            Dictionary<string, SocketRole> guildroles = CreateRoleDictionary(rolesCollection.GetEnumerator(), rolesCollection.Count);
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [Guild Info Service]: Successfully saved roles for the guild {guild.Name}");
             return Task.Run(() => GuildRoles.Add(guild.Id, guildroles));
         }
@@ -84,7 +71,7 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
 
         #region CreateRoleDictionary
 
-        private Dictionary<string, SocketRole> CreateRoleDictionary(IEnumerator<SocketRole> guildRoles, int count)
+        private static Dictionary<string, SocketRole> CreateRoleDictionary(IEnumerator<SocketRole> guildRoles, int count)
         {
             Dictionary<string, SocketRole> roles = new Dictionary<string, SocketRole>();
             IEnumerator<SocketRole> guildRolesPtr = guildRoles;
@@ -92,7 +79,8 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
             int i = 1;
             while (i < count + 1)
             {
-                roles.Add(guildRolesPtr.Current.Name.ToLower(), guildRolesPtr.Current);
+                if (guildRolesPtr.Current != null)
+                    roles.Add(guildRolesPtr.Current.Name.ToLower(), guildRolesPtr.Current);
                 i++;
                 guildRolesPtr.MoveNext();
             }

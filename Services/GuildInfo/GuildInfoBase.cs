@@ -13,11 +13,9 @@ namespace BorisGangBot_Mk2.Services.GuildInfo
         //
         //
 
-        public List<string> RoleMeEnabledRoles { get; set; }
+        public Dictionary<ulong, SocketGuild> Guilds { get; protected set; }
 
-        public Dictionary<ulong, SocketGuild> Guilds { get; set; }
-
-        public Dictionary<ulong, Dictionary<string, SocketRole>> GuildRoles { get; set; }
+        public Dictionary<ulong, Dictionary<string, SocketRole>> GuildRoles { get; protected set; }
 
     }
 }
