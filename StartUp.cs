@@ -13,7 +13,7 @@ namespace BorisGangBot_Mk2
 {
     class StartUp
     {
-        public IConfigurationRoot Configuration { get; }
+        private IConfigurationRoot Configuration { get; }
 
         public StartUp(string[] args)
         {
@@ -30,7 +30,7 @@ namespace BorisGangBot_Mk2
 
         }
 
-        public async Task RunAsync()
+        private async Task RunAsync()
         {
             var services = new ServiceCollection();
             ConfigureServices(services);
