@@ -9,13 +9,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using TwitchLib.Api;
 using TwitchLib.Api.Helix.Models.Games;
-using TwitchLib.Api.Helix.Models.Streams;
 using TwitchLib.Api.Helix.Models.Users;
-using TwitchLib.Api.Interfaces;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
-using TwitchLib.Api.V5.Models.Streams;
 using YamlDotNet.Serialization;
 
 namespace BorisGangBot_Mk2.Services
@@ -24,7 +21,7 @@ namespace BorisGangBot_Mk2.Services
     {
         private readonly IConfigurationRoot _config;
         private readonly DiscordSocketClient _discord;
-        public LiveStreamMonitorService LiveStreamMonitor;
+        private LiveStreamMonitorService _liveStreamMonitor;
 
 
 
@@ -42,44 +39,48 @@ namespace BorisGangBot_Mk2.Services
             NotifChannelName = "stream-updates";
 
             // Assign twitch api credentials
-            TwitchAPI _api = new TwitchAPI();
-            _api.Settings.ClientId = _config["tokens:tw_cID"];
-            _api.Settings.AccessToken = _config["tokens:tw_token"];
-            TwAPI = _api;
+            TwitchAPI api = new TwitchAPI();
+            api.Settings.ClientId = _config["tokens:tw_cID"];
+            api.Settings.AccessToken = _config["tokens:tw_token"];
+            TwApi = api;
         }
 
         #region CreateStreamMonoAsync
         private async Task CreateStreamMonoAsync()
         {
             StreamModels = new Dictionary<string, StreamModel>();
-            await Task.Run(() => GetStreamerList());
+            await Task.Run(GetStreamerList);
 
-            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: GUILD COUNT {_discord.Guilds.Count}");
+            await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: GUILD COUNT {_discord.Guilds.Count}");
 
             List<SocketTextChannel> notifChannels = new List<SocketTextChannel>();
-            IEnumerator<SocketGuild> IEguilds = _discord.Guilds.GetEnumerator();
-            IEguilds.MoveNext();
-            while (IEguilds.Current != null)
+            IEnumerator<SocketGuild> eguilds = _discord.Guilds.GetEnumerator();
+
+            eguilds.MoveNext();
+            while (eguilds.Current != null)
             {
                 int currentPos = 0;
-                Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Current Guild: {IEguilds.Current.Name}");
-                IEnumerator<SocketTextChannel> IEchannels = IEguilds.Current.TextChannels.GetEnumerator();
-                IEchannels.MoveNext();
-                while (currentPos != IEguilds.Current.TextChannels.Count - 1)
+
+                await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Current Guild: {eguilds.Current.Name}");
+                
+                IEnumerator<SocketTextChannel> echannels = eguilds.Current.TextChannels.GetEnumerator();
+
+                echannels.MoveNext();
+                while (currentPos != eguilds.Current.TextChannels.Count - 1)
                 {
                     currentPos++;
-                    if (IEchannels.Current.Name.Contains(NotifChannelName))
+                    if (echannels.Current != null && echannels.Current.Name.Contains(NotifChannelName))
                     {
-                        notifChannels.Add(IEchannels.Current);
+                        notifChannels.Add(echannels.Current);
                         break;
                     }
-                    IEchannels.MoveNext();
+                    echannels.MoveNext();
                 }
                 currentPos = 0;
-                IEchannels.Dispose();
-                IEguilds.MoveNext();
+                echannels.Dispose();
+                eguilds.MoveNext();
             }
-            IEguilds.Dispose();
+            eguilds.Dispose();
 
             StreamNotifChannels = notifChannels;
 
@@ -94,19 +95,19 @@ namespace BorisGangBot_Mk2.Services
 
             StreamProfileImages = await GetProfImgUrlsAsync(StreamList);
 
-            LiveStreamMonitor = new LiveStreamMonitorService(TwAPI, UpdInt, 100);
+            _liveStreamMonitor = new LiveStreamMonitorService(TwApi, UpdInt, 100);
 
             //LiveStreamMonitor.OnServiceTick += LiveStreamMonitor_OnServiceTick;
-            LiveStreamMonitor.OnChannelsSet += OnChannelsSetEvent;
-            LiveStreamMonitor.OnServiceStarted += OnServiceStartedEvent;
-            LiveStreamMonitor.OnServiceStopped += OnServiceStoppedEvent;
-            LiveStreamMonitor.OnStreamOnline += OnStreamOnlineEventAsync;
+            _liveStreamMonitor.OnChannelsSet += OnChannelsSetEvent;
+            _liveStreamMonitor.OnServiceStarted += OnServiceStartedEvent;
+            _liveStreamMonitor.OnServiceStopped += OnServiceStoppedEvent;
+            _liveStreamMonitor.OnStreamOnline += OnStreamOnlineEventAsync;
 
-            LiveStreamMonitor.SetChannelsByName(StreamList);
+            _liveStreamMonitor.SetChannelsByName(StreamList);
 
-            LiveStreamMonitor.Start();
+            _liveStreamMonitor.Start();
 
-            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Was service enabled? - {LiveStreamMonitor.Enabled}");
+            await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Was service enabled? - {_liveStreamMonitor.Enabled}");
         }
 
         #endregion
@@ -122,29 +123,31 @@ namespace BorisGangBot_Mk2.Services
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} SERVICE TICK");
         }
 
-        private void OnServiceStartedEvent(object sender, OnServiceStartedArgs e)
+        private static void OnServiceStartedEvent(object sender, OnServiceStartedArgs e)
         {
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Live Stream Monitor Service started successfully.");
         }
 
-        private void OnServiceStoppedEvent(object sender, OnServiceStoppedArgs e)
+        private static void OnServiceStoppedEvent(object sender, OnServiceStoppedArgs e)
         {
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Live Stream Monitor Service has been stopped.");
         }
 
         private async void OnStreamOnlineEventAsync(object sender, OnStreamOnlineArgs e)
         {
-            List<string> gameTemp = new List<string>
+            var gameTemp = new List<string>
             {
                 e.Stream.GameId
             };
 
-            GetGamesResponse getGamesResponse = await TwAPI.Helix.Games.GetGamesAsync(gameTemp);
+            GetGamesResponse getGamesResponse = await TwApi.Helix.Games.GetGamesAsync(gameTemp);
 
             UpdateLiveStreamModelsAsync(e.Channel.ToLower(), e.Stream, getGamesResponse);
-            Console.Out.WriteLine(StreamModels.Keys.Contains(e.Channel) + " " + e.Channel + " " + e.Stream.UserName);
+
+            await Console.Out.WriteLineAsync(StreamModels.Keys.Contains(e.Channel) + " " + e.Channel + " " + e.Stream.UserName);
+
             CreateStreamerEmbed(StreamModels[e.Stream.UserName]);
-            foreach (SocketTextChannel x in StreamNotifChannels)
+            foreach (var x in StreamNotifChannels)
             {
                 await x.SendMessageAsync(null, false, StreamEmbeds[e.Stream.UserName].Build());
             }
@@ -152,7 +155,7 @@ namespace BorisGangBot_Mk2.Services
 
         private void OnChannelsSetEvent(object sender, OnChannelsSetArgs e)
         {
-            if (!(LiveStreamMonitor.ChannelsToMonitor == null))
+            if (_liveStreamMonitor.ChannelsToMonitor != null)
             {
                 Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Channels to monitor set.");
                 return;
@@ -213,7 +216,7 @@ namespace BorisGangBot_Mk2.Services
         {
             Dictionary<string, string> profImages = new Dictionary<string, string>();
 
-            GetUsersResponse usersResponse = await TwAPI.Helix.Users.GetUsersAsync(null, streams, TwAPI.Settings.AccessToken);
+            GetUsersResponse usersResponse = await TwApi.Helix.Users.GetUsersAsync(null, streams, TwApi.Settings.AccessToken);
 
             foreach (var user in usersResponse.Users)
             {
@@ -223,21 +226,21 @@ namespace BorisGangBot_Mk2.Services
             return profImages;
         }
 
-        public void CreateStreamerEmbed(StreamModel streamModel)
+        private void CreateStreamerEmbed(StreamModel streamModel)
         {
             if (StreamEmbeds.ContainsKey(streamModel.Stream))
             {
                 EmbedBuilder embed = StreamEmbeds[streamModel.Stream];
 
                 embed.Title = streamModel.Title;
-                embed.Fields[0].Value = streamModel.Game != null ? streamModel.Game : "Unknown";
+                embed.Fields[0].Value = streamModel.Game ?? "Unknown";
                 embed.Fields[1].Value = streamModel.Viewers;
 
                 StreamEmbeds[streamModel.Stream.ToLower()] = embed;
                 return;
             }
 
-            
+
             var a = new EmbedAuthorBuilder()
             {
                 Name = streamModel.Stream,
@@ -255,14 +258,7 @@ namespace BorisGangBot_Mk2.Services
             {
                 x.IsInline = true;
                 x.Name = "**Playing:**";
-                if (streamModel.Game == null)
-                {
-                    x.Value = "Unknown";
-                }
-                else
-                {
-                    x.Value = streamModel.Game;
-                }
+                x.Value = streamModel.Game ?? "Unknown";
             });
             eb.AddField(x =>
             {
