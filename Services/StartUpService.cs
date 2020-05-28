@@ -37,8 +37,8 @@ namespace BorisGangBot_Mk2.Services
 
         public async Task StartAsync()
         {
-            string discordToken = _config["tokens:discord"]; // Token used by Released bot
-            //string discordToken = _config["tokens:discord_testing"]; // Token used by seperate dev version of bot
+            //string discordToken = _config["tokens:discord"]; // Token used by Released bot
+            string discordToken = _config["tokens:discord_testing"]; // Token used by separate dev version of bot
 
             if (string.IsNullOrWhiteSpace(discordToken))
             {
@@ -50,7 +50,31 @@ namespace BorisGangBot_Mk2.Services
 
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _provider); // Load commands and modules into the command service
 
-            await _discord.SetGameAsync(";h for info", null, ActivityType.Listening);
+            if (_config["botActivity:activity"] != null)
+            {
+                switch (_config["botActivity:activity"].ToLower())
+                {
+                    case "listening":
+                        await _discord.SetGameAsync($"{_config["botActivity:description"]}", null, ActivityType.Listening);
+                        break;
+
+                    case "playing":
+                        await _discord.SetGameAsync($"{_config["botActivity:description"]}", null, ActivityType.Playing);
+                        break;
+
+                    case "watching":
+                        await _discord.SetGameAsync($"{_config["botActivity:description"]}", null, ActivityType.Watching);
+                        break;
+
+                    case "streaming":
+                        await _discord.SetGameAsync($"{_config["botActivity:description"]}", null, ActivityType.Streaming);
+                        break;
+
+                    default:
+                        await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StartUp]: Bot Activity value was misspelled. Please double check _config.yml.");
+                        break;
+                }
+            }
         }
     }
 }
