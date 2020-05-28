@@ -196,7 +196,7 @@ namespace BorisGangBot_Mk2.Services
 
             string gameName = gamesResponse.Games.Length != 0 ? gamesResponse.Games[0].Name : null;
 
-            if (StreamModels.ContainsKey(streamToModel))
+            if (StreamModels[streamToModel] != null)
             { // Just update Title, Game, and Viewers
                 StreamModels[streamToModel].Game = gameName;
                 StreamModels[streamToModel].Title = twStream.Title;
@@ -213,8 +213,14 @@ namespace BorisGangBot_Mk2.Services
                 Viewers = twStream.ViewerCount,
                 Link = $"https://www.twitch.tv/{twStream.UserName}"
             };
-
-            StreamModels.Add(streamModel.Stream, streamModel);
+            try
+            {
+                StreamModels.Add(streamModel.Stream, streamModel);
+            }
+            catch (Exception e)
+            {
+                Console.Out.WriteLineAsync(e.Message);
+            }
         }
 
         private async Task<Dictionary<string, string>> GetProfImgUrlsAsync(List<string> streams)
