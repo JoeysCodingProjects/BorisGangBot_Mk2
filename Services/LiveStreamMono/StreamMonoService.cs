@@ -102,7 +102,7 @@ namespace BorisGangBot_Mk2.Services
 
             _liveStreamMonitor = new LiveStreamMonitorService(TwApi, UpdInt, 100);
 
-            //LiveStreamMonitor.OnServiceTick += LiveStreamMonitor_OnServiceTick;
+            _liveStreamMonitor.OnServiceTick += OnServiceTickEvent;
             _liveStreamMonitor.OnChannelsSet += OnChannelsSetEvent;
             _liveStreamMonitor.OnServiceStarted += OnServiceStartedEvent;
             _liveStreamMonitor.OnServiceStopped += OnServiceStoppedEvent;
@@ -123,9 +123,9 @@ namespace BorisGangBot_Mk2.Services
         // Events
         // -----
 
-        private void LiveStreamMonitor_OnServiceTick(object sender, OnServiceTickArgs e)
+        private void OnServiceTickEvent(object sender, OnServiceTickArgs e)
         {
-            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} SERVICE TICK");
+            
         }
 
         private static void OnServiceStartedEvent(object sender, OnServiceStartedArgs e)
@@ -281,12 +281,11 @@ namespace BorisGangBot_Mk2.Services
         // -----
         // General Purpose Functions
         // -----
-        //public async Task<bool> TryUpdateStreamFileAsync(string streamer)
-        //{
-        //    bool fileupdated = false;
-
-        //    return fileupdated;
-        //}
+        public void UpdateChannelsToMonitor()
+        {
+            GetStreamerList();
+            _liveStreamMonitor.SetChannelsByName(StreamList);
+        }
 
         #endregion
     }

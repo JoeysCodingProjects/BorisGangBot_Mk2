@@ -1,7 +1,10 @@
 ﻿using BorisGangBot_Mk2.Helpers;
+using BorisGangBot_Mk2.Services.LiveStreamMono;
 using Discord.Commands;
 using System;
 using System.Threading.Tasks;
+using BorisGangBot_Mk2.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace BorisGangBot_Mk2.Modules.StreamModules
 {
@@ -9,8 +12,10 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
     [RequireUserPermission(Discord.GuildPermission.ManageRoles)]
     public class AddStreamerModule : ModuleBase<SocketCommandContext>
     {
-        public AddStreamerModule()
+        private readonly StreamMonoService _lsms;
+        public AddStreamerModule(StreamMonoService lsms)
         {
+            _lsms = lsms;
         }
 
         // AddStreamerAsync
@@ -23,18 +28,27 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
         [Summary("Manually add a streamer to the list of streamers. Must have the \"Manage Roles\" permission.")]
         public async Task AddStreamerAsync(string streamer)
         {
-            StreamerFileHelper addStreamer = new StreamerFileHelper();
-            bool t = await addStreamer.TryAddStreamerAsync(streamer);
+            StreamerFileHelper sfh = new StreamerFileHelper(_lsms);
+            int t = await sfh.TryAddStreamerAsync(streamer);
 
             try
             {
-                if (t)
+                if (t == 1)
                 {
                     await ReplyAsync($"Successfully added {streamer}!", false);
+                    _lsms.UpdateChannelsToMonitor();
+                }
+                else if (t == 0)
+                {
+                    await ReplyAsync("That streamer is already on the list.", false);
+                }
+                else if (t == -1)
+                {
+                    await ReplyAsync($"Failed to verify that anyone by the name {streamer} exists on Twitch. Did you spell their name correctly?");
                 }
                 else
                 {
-                    await ReplyAsync("That streamer is already on the list.", false);
+                    await ReplyAsync("I don't know how this happened, but something returned a value that should not be possible.");
                 }
             }
             catch (Exception e)
@@ -54,7 +68,7 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
         [Summary("Removes the mentioned streamer from the list. Must have the \"Manage Roles\" permission.")]
         public async Task RemoveStreamerAsync(string streamer)
         {
-            StreamerFileHelper sfh = new StreamerFileHelper();
+            StreamerFileHelper sfh = new StreamerFileHelper(_lsms);
             bool t = await sfh.TryRemoveStreamerAsync(streamer);
 
             try
@@ -62,6 +76,7 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
                 if (t)
                 {
                     await ReplyAsync($"Successfully removed {streamer}.");
+                    _lsms.UpdateChannelsToMonitor();
                 }
                 else
                 {

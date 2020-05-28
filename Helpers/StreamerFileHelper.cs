@@ -1,14 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
+using BorisGangBot_Mk2.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace BorisGangBot_Mk2.Helpers
 {
     public class StreamerFileHelper
     {
-        public StreamerFileHelper()
+        private readonly StreamMonoService _lsms;
+        public StreamerFileHelper(StreamMonoService lsms)
         {
+            _lsms = lsms;
         }
 
         // TryAddStreamerAsync
@@ -17,16 +22,24 @@ namespace BorisGangBot_Mk2.Helpers
         // Streamer Name (string)
         //
         // Returns:
-        // true - Streamer successfully added
-        // false - Streamer already exists
+        // 
 
         #region TryAddStreamerAsync(string)
-        public async Task<bool> TryAddStreamerAsync(string streamer)
+        public async Task<int> TryAddStreamerAsync(string streamer)
         {
+            string s = streamer.ToLower();
+
+            if (_lsms.StreamList.Contains(s))
+                return 0;
+
+            VerifyStreamerHelper verifyStreamer = new VerifyStreamerHelper(_lsms);
+
+            if (await verifyStreamer.TryVerifyStreamerAsync(streamer) == false)
+                return -1;
+
             Deserializer deserializer = new Deserializer();
             Serializer serializer = new Serializer();
             string result;
-            string s = streamer.ToLower();
 
 
             using (StreamReader reader = File.OpenText("./Streamers.yml"))
@@ -37,15 +50,12 @@ namespace BorisGangBot_Mk2.Helpers
 
             List<string> streamslist = deserializer.Deserialize<List<string>>(result);
 
-            if (streamslist.Contains(s))
-                return false;
-
 
             streamslist.Add(s);
             object listfinal = serializer.Serialize(streamslist);
             await File.WriteAllTextAsync("./Streamers.yml", listfinal.ToString());
 
-            return true;
+            return 1;
         }
         #endregion
 

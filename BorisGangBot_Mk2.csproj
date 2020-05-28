@@ -25,9 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Helpers\StreamHelpers.cs">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Compile>
     <Compile Update="Models\StreamModel.cs">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Compile>

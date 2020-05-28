@@ -10,7 +10,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
     {
 
         // Twitch API
-        protected ITwitchAPI TwApi;
+        public ITwitchAPI TwApi;
 
         // Timer Update Interval in milliseconds
         protected int UpdInt { get; set; }
