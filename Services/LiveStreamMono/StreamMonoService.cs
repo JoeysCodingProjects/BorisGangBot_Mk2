@@ -31,12 +31,17 @@ namespace BorisGangBot_Mk2.Services
             _discord = discord;
             _discord.Ready += CreateStreamMonoAsync;
 
-
-            // Service update interval in seconds
-            UpdInt = 30;
-
-            // Name of channel to use when sending notifications
-            NotifChannelName = "stream-updates";
+            // Assign Config File Variables
+            try
+            {
+                UpdInt = int.Parse(_config["liveStreamMono:updIntervalSeconds"]);
+            }
+            catch 
+            {
+                Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Failed to parse Update Interval from _config.yml. Defaulting to 30 seconds.");
+                UpdInt = 30;
+            }
+            NotifChannelName = _config["liveStreamMono:notifChannelName"];
 
             // Assign twitch api credentials
             TwitchAPI api = new TwitchAPI();

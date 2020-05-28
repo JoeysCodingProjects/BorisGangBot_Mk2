@@ -16,13 +16,13 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         protected int UpdInt { get; set; }
 
         // List of Streamers by UserLogin
-        protected List<string> StreamList { get; set; }
+        public List<string> StreamList { get; protected set; }
 
         protected Dictionary<string, StreamModel> StreamModels { get; set; }
 
         protected Dictionary<string, string> StreamProfileImages { get; set; }
 
-        protected Dictionary<string, EmbedBuilder> StreamEmbeds = new Dictionary<string, EmbedBuilder>();
+        protected readonly Dictionary<string, EmbedBuilder> StreamEmbeds = new Dictionary<string, EmbedBuilder>();
 
         protected List<SocketTextChannel> StreamNotifChannels { get; set; }
 
