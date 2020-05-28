@@ -42,7 +42,7 @@ namespace BorisGangBot_Mk2.Helpers
             var dmchannel = await _discord.GetDMChannelAsync(dm_channel_id);
             if (dmchannel == null)
             {
-                Console.Out.WriteLine("[DM CHANNEL] Do Not Forget - DM the bot to create the error reporting DM channel.");
+                await Console.Out.WriteLineAsync("[DM CHANNEL] Do Not Forget - DM the bot to create the error reporting DM channel.");
                 return;
             }
             StringBuilder sb = new StringBuilder();
@@ -53,19 +53,8 @@ namespace BorisGangBot_Mk2.Helpers
 
             sb.Append($"{DateTime.UtcNow.ToString("hh:mm:ss")} [{cmd}]: Failed to execute - ");
 
-            if (reason.Equals("Unknown"))
-            {
-                sb.Append("No reason specified.");
-            }
-            else
-            {
-                sb.Append($"Reason: {reason}");
-            }
-            
-            if (dmchannel == null)
-            {
-                return;
-            }
+            sb.Append(reason.Equals("Unknown") ? "No reason specified." : $"Reason: {reason}");
+
             await dmchannel.SendMessageAsync(sb.ToString());
         }
         #endregion
