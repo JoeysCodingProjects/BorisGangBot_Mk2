@@ -8,8 +8,11 @@
 
   <ItemGroup>
     <Compile Remove="Modules\AudioModules\**" />
+    <Compile Remove="Modules\FunnyModules\**" />
     <EmbeddedResource Remove="Modules\AudioModules\**" />
+    <EmbeddedResource Remove="Modules\FunnyModules\**" />
     <None Remove="Modules\AudioModules\**" />
+    <None Remove="Modules\FunnyModules\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,7 +68,6 @@
 
   <ItemGroup>
     <Folder Include="Media\Images\" />
-    <Folder Include="Modules\FunnyModules\" />
     <Folder Include="Modules\MembersModules\" />
     <Folder Include="Preconditions\" />
   </ItemGroup>
