@@ -53,6 +53,7 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
             }
             catch (Exception e)
             {
+                await Console.Out.WriteLineAsync(e.Message);
                 await ReplyAsync("Something went wrong adding this streamer.");
             }
         }
@@ -85,6 +86,7 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
             }
             catch (Exception e)
             {
+                await Console.Out.WriteLineAsync(e.Message);
                 await ReplyAsync("Something went wrong trying to remove this streamer.");
             }
         }

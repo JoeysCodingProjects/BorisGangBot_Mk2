@@ -22,13 +22,17 @@ namespace BorisGangBot_Mk2.Services
         private readonly IConfigurationRoot _config;
         private readonly DiscordSocketClient _discord;
         private LiveStreamMonitorService _liveStreamMonitor;
+        private LoggingService _logging;
 
 
 
-        public StreamMonoService(IConfigurationRoot config, DiscordSocketClient discord)
+        public StreamMonoService(IConfigurationRoot config,
+            DiscordSocketClient discord,
+            LoggingService logging)
         {
             _config = config;
             _discord = discord;
+            _logging = logging;
             _discord.Ready += CreateStreamMonoAsync;
 
             // Assign Config File Variables
@@ -91,11 +95,11 @@ namespace BorisGangBot_Mk2.Services
 
             if (StreamNotifChannels.Count != 0)
             {
-                Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Successfully collected Stream Update Notification channels.");
+                await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Successfully collected Stream Update Notification channels.");
             }
             else
             {
-                Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService ERROR]: No Stream Update Notification channels were found!");
+                await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService ERROR]: No Stream Update Notification channels were found!");
             }
 
             StreamProfileImages = await GetProfImgUrlsAsync(StreamList);
@@ -196,12 +200,18 @@ namespace BorisGangBot_Mk2.Services
 
             string gameName = gamesResponse.Games.Length != 0 ? gamesResponse.Games[0].Name : null;
 
-            if (StreamModels[streamToModel] != null)
-            { // Just update Title, Game, and Viewers
+            try
+            {
+                // Just update Title, Game, and Viewers
                 StreamModels[streamToModel].Game = gameName;
                 StreamModels[streamToModel].Title = twStream.Title;
                 StreamModels[streamToModel].Viewers = twStream.ViewerCount;
                 return;
+            }
+            catch (Exception e)
+            {
+                StreamModels.Remove(streamToModel);
+                Console.Out.WriteLine(e.Message);
             }
 
             StreamModel streamModel = new StreamModel()
