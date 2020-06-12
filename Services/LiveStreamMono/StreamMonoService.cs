@@ -1,12 +1,12 @@
-﻿using BorisGangBot_Mk2.Models;
-using Discord;
-using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using BorisGangBot_Mk2.Models;
+using Discord;
+using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using TwitchLib.Api;
 using TwitchLib.Api.Helix.Models.Games;
 using TwitchLib.Api.Helix.Models.Users;
@@ -15,7 +15,7 @@ using TwitchLib.Api.Services.Events;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 using YamlDotNet.Serialization;
 
-namespace BorisGangBot_Mk2.Services
+namespace BorisGangBot_Mk2.Services.LiveStreamMono
 {
     public class StreamMonoService : LiveStreamMono.StreamMonoServiceBase
     {

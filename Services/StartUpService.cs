@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using BorisGangBot_Mk2.Services.GuildInfo;
+using BorisGangBot_Mk2.Services.LiveStreamMono;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -37,8 +38,8 @@ namespace BorisGangBot_Mk2.Services
 
         public async Task StartAsync()
         {
-            string discordToken = _config["tokens:discord"]; // Token used by Released bot
-            //string discordToken = _config["tokens:discord_testing"]; // Token used by separate dev version of bot
+            //string discordToken = _config["tokens:discord"]; // Token used by Released bot
+            string discordToken = _config["tokens:discord_testing"]; // Token used by separate dev version of bot
 
             if (string.IsNullOrWhiteSpace(discordToken))
             {

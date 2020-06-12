@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using BorisGangBot_Mk2.Services;
 using BorisGangBot_Mk2.Services.GuildInfo;
+using BorisGangBot_Mk2.Services.LiveStreamMono;
 
 namespace BorisGangBot_Mk2
 {

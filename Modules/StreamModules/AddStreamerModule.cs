@@ -25,6 +25,7 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
 
         #region AddStreamerAsync
         [Command("addstreamer")]
+        [Alias("add")]
         [Summary("Manually add a streamer to the list of streamers. Must have the \"Manage Roles\" permission.")]
         public async Task AddStreamerAsync(string streamer)
         {
@@ -66,6 +67,7 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
 
         #region RemoveStreamerAsync
         [Command("removestreamer")]
+        [Alias("remove")]
         [Summary("Removes the mentioned streamer from the list. Must have the \"Manage Roles\" permission.")]
         public async Task RemoveStreamerAsync(string streamer)
         {

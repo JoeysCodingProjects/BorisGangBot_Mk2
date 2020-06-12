@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
-using BorisGangBot_Mk2.Services;
+using BorisGangBot_Mk2.Services.LiveStreamMono;
 using Microsoft.Extensions.Configuration;
 
 namespace BorisGangBot_Mk2.Helpers

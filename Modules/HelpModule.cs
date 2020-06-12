@@ -75,8 +75,9 @@ namespace BorisGangBot_Mk2.Modules
         #endregion
 
         #region Help Command Specific
-        //[Command("help")]
-        //[Summary("Add a command to the end to get more information about it.")]
+        [Command("help")]
+        [Alias("h")]
+        [Summary("Add a command to the end to get more information about it.")]
         public async Task HelpAsync(string command)
         {
             var result = _service.Search(Context, command);
