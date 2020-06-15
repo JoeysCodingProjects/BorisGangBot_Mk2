@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using BorisGangBot_Mk2.Models;
 using Discord;
@@ -144,21 +145,38 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 
         private async void OnStreamOnlineEventAsync(object sender, OnStreamOnlineArgs e)
         {
+            
             var gameTemp = new List<string>
             {
                 e.Stream.GameId
             };
+            GetGamesResponse getGamesResponse = new GetGamesResponse();
+            try
+            {
+                getGamesResponse = await TwApi.Helix.Games.GetGamesAsync(gameTemp);
+            }
+            catch (Exception ex)
+            {
+                await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error at GetGamesResponse - {ex.Message}");
+            }
 
-            GetGamesResponse getGamesResponse = await TwApi.Helix.Games.GetGamesAsync(gameTemp);
 
-            UpdateLiveStreamModelsAsync(e.Channel.ToLower(), e.Stream, getGamesResponse);
+            try
+            {
+                UpdateLiveStreamModelsAsync(e.Stream.UserName, e.Stream, getGamesResponse);
+            }
+            catch (Exception ex)
+            {
+                await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error at GetGamesResponse - {ex.Message}");
+            }
 
-            await Console.Out.WriteLineAsync(StreamModels.Keys.Contains(e.Channel) + " " + e.Channel + " " + e.Stream.UserName);
+            await Console.Out.WriteLineAsync(StreamModels.Keys.Contains(e.Stream.UserName) + " " + e.Channel + " " + e.Stream.UserName);
 
             CreateStreamerEmbed(StreamModels[e.Stream.UserName]);
             foreach (var x in StreamNotifChannels)
             {
                 await x.SendMessageAsync(null, false, StreamEmbeds[e.Stream.UserName].Build());
+                StreamEmbeds.Remove(e.Stream.UserName);
             }
         }
 
@@ -208,10 +226,9 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 StreamModels[streamToModel].Viewers = twStream.ViewerCount;
                 return;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                StreamModels.Remove(streamToModel);
-                Console.Out.WriteLine(e.Message);
+                Console.Out.WriteLine($"{ex.GetType().Name}: Error inside UpdateLiveStreamModelsAsync - {ex.Message}");
             }
 
             StreamModel streamModel = new StreamModel()
