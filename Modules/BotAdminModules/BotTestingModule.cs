@@ -33,9 +33,9 @@ namespace BorisGangBot_Mk2.Modules.BotAdminModules
         public async Task SendRandomInfoAsync()
         {
             string msg = "";
-            foreach (string r in _streams.StreamIdList)
+            foreach (string r in _streams.StreamIds.Keys.AsEnumerable().ToList())
             {
-                msg += " " + r;
+                msg += " | " + r + " - " + _streams.StreamIds[r];
             }
             await ReplyAsync(msg);
         }

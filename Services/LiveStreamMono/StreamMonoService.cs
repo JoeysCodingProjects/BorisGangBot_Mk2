@@ -206,44 +206,6 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         // Monitor Service Required Functions
         // -----
 
-        //private void UpdateLiveStreamModelsAsync(string streamToModel, TwitchLib.Api.Helix.Models.Streams.Stream twStream, GetGamesResponse gamesResponse)
-        //{
-        //    List<string> gameIdTemp = new List<string> { twStream.GameId };
-
-        //    string gameName = gamesResponse.Games.Length != 0 ? gamesResponse.Games[0].Name : null;
-
-        //    try
-        //    {
-        //        // Just update Title, Game, and Viewers
-        //        StreamModels[streamToModel].Game = gameName;
-        //        StreamModels[streamToModel].Title = twStream.Title;
-        //        StreamModels[streamToModel].Viewers = twStream.ViewerCount;
-        //        return;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.Out.WriteLine($"{ex.GetType().Name}: Error inside UpdateLiveStreamModelsAsync - {ex.Message}");
-        //    }
-
-        //    StreamModel streamModel = new StreamModel()
-        //    {
-        //        Stream = twStream.UserName,
-        //        Avatar = StreamProfileImages[streamToModel],
-        //        Title = twStream.Title,
-        //        Game = gameName,
-        //        Viewers = twStream.ViewerCount,
-        //        Link = $"https://www.twitch.tv/{twStream.UserName}"
-        //    };
-        //    try
-        //    {
-        //        StreamModels.Add(streamModel.Stream, streamModel);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.Out.WriteLineAsync(e.Message);
-        //    }
-        //}
-
         private void GetStreamerList()
         {
             Deserializer deserializer = new Deserializer();
@@ -275,10 +237,8 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Streamer ID List Creation finished.");
         }
 
-        private void UpdateLiveStreamModelsAsync(
-            TwitchLib.Api.Helix.Models.Streams.Stream twitchStream,
-            GetGamesResponse game
-            )
+        private void UpdateLiveStreamModelsAsync(TwitchLib.Api.Helix.Models.Streams.Stream twitchStream,
+            GetGamesResponse game)
         {
             string gameName = game.Games.Length != 0 ? game.Games[0].Name : "Unknown";
 
