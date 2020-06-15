@@ -21,7 +21,7 @@ namespace BorisGangBot_Mk2.Helpers
             _lsms = lsms;
         }
 
-        public async Task<bool> TryVerifyStreamerAsync(string streamer)
+        public async Task<string> TryVerifyStreamerAsync(string streamer)
         {
             try
             {
@@ -31,11 +31,11 @@ namespace BorisGangBot_Mk2.Helpers
 
                 GetUsersResponse result = await _lsms.TwApi.Helix.Users.GetUsersAsync(logins:tmp, accessToken:_lsms.TwApi.Settings.AccessToken);
 
-                return result.Users[0].Login != null;
+                return result.Users[0].Id;
             }
             catch (Exception e)
             {
-                return false;
+                return null;
             }
         }
 }

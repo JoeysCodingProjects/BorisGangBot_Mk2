@@ -107,7 +107,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 
             try
             {
-                StreamProfileImages = await GetProfImgUrlsAsync(StreamList);
+                StreamProfileImages = await GetProfImgUrlsAsync(StreamIdList);
             }
             catch (TwitchLib.Api.Core.Exceptions.InternalServerErrorException ex)
             {
@@ -123,7 +123,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             _liveStreamMonitor.OnServiceStopped += OnServiceStoppedEvent;
             _liveStreamMonitor.OnStreamOnline += OnStreamOnlineEventAsync;
 
-            _liveStreamMonitor.SetChannelsByName(StreamList);
+            _liveStreamMonitor.SetChannelsById(StreamIdList);
 
             _liveStreamMonitor.Start();
 
@@ -172,20 +172,20 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 
             try
             {
-                UpdateLiveStreamModelsAsync(e.Stream.UserName, e.Stream, getGamesResponse);
+                UpdateLiveStreamModelsAsync(e.Stream, getGamesResponse);
             }
             catch (Exception ex)
             {
                 await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error at UpdateLiveStreamModelsAsync - {ex.Message}");
             }
 
-            await Console.Out.WriteLineAsync(StreamModels.Keys.Contains(e.Stream.UserName) + " " + e.Channel + " " + e.Stream.UserName);
+            await Console.Out.WriteLineAsync(StreamModels.Keys.Contains(e.Stream.UserId) + " " + e.Channel + " " + e.Stream.UserName);
 
-            CreateStreamerEmbed(StreamModels[e.Stream.UserName]);
+            CreateStreamerEmbed(StreamModels[e.Stream.UserId]);
             foreach (var x in StreamNotifChannels)
             {
-                await x.SendMessageAsync(null, false, StreamEmbeds[e.Stream.UserName].Build());
-                StreamEmbeds.Remove(e.Stream.UserName);
+                await x.SendMessageAsync(null, false, StreamEmbeds[e.Stream.UserId].Build());
+                StreamEmbeds.Remove(e.Stream.UserId);
             }
         }
 
@@ -275,38 +275,39 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Streamer ID List Creation finished.");
         }
 
-        private void UpdateLiveStreamModelsAsync(string streamToModel, // Twitch UserName
-            TwitchLib.Api.Helix.Models.Streams.Stream twitchStream, // Twitch Stream Model
-            GetGamesResponse game) // Game
+        private void UpdateLiveStreamModelsAsync(
+            TwitchLib.Api.Helix.Models.Streams.Stream twitchStream,
+            GetGamesResponse game
+            )
         {
-            List<string> gameIdTemp = new List<string> { twitchStream.GameId };
             string gameName = game.Games.Length != 0 ? game.Games[0].Name : "Unknown";
 
             StreamModel streamModel = new StreamModel()
             {
-                Stream = streamToModel,
-                Avatar = StreamProfileImages[streamToModel],
+                Stream = twitchStream.UserName,
+                Id = twitchStream.UserId,
+                Avatar = StreamProfileImages[twitchStream.UserId],
                 Title = twitchStream.Title,
                 Game = gameName,
                 Viewers = twitchStream.ViewerCount,
-                Link = $"https://www.twitch.tv/{streamToModel}"
+                Link = $"https://www.twitch.tv/{twitchStream.UserName}"
             };
 
-            if (StreamModels.ContainsKey(streamToModel))
-                StreamModels.Remove(streamToModel);
+            if (StreamModels.ContainsKey(twitchStream.UserId))
+                StreamModels.Remove(twitchStream.UserId);
 
-            StreamModels.Add(streamToModel, streamModel);
+            StreamModels.Add(twitchStream.UserId, streamModel);
         }
 
-        private async Task<Dictionary<string, string>> GetProfImgUrlsAsync(List<string> streams)
+        private async Task<Dictionary<string, string>> GetProfImgUrlsAsync(List<string> streamIds)
         {
             Dictionary<string, string> profImages = new Dictionary<string, string>();
 
-            GetUsersResponse usersResponse = await TwApi.Helix.Users.GetUsersAsync(null, streams, TwApi.Settings.AccessToken);
+            GetUsersResponse usersResponse = await TwApi.Helix.Users.GetUsersAsync(streamIds, null, TwApi.Settings.AccessToken);
 
             foreach (var user in usersResponse.Users)
             {
-                profImages.Add(user.Login, user.ProfileImageUrl);
+                profImages.Add(user.Id, user.ProfileImageUrl);
             }
 
             return profImages;
@@ -314,8 +315,8 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 
         private void CreateStreamerEmbed(StreamModel streamModel)
         {
-            if (StreamEmbeds.ContainsKey(streamModel.Stream))
-                StreamEmbeds.Remove(streamModel.Stream);
+            if (StreamEmbeds.ContainsKey(streamModel.Id))
+                StreamEmbeds.Remove(streamModel.Id);
 
 
             var a = new EmbedAuthorBuilder()
@@ -344,7 +345,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 x.Value = streamModel.Viewers;
             });
 
-            StreamEmbeds.Add(streamModel.Stream, eb);
+            StreamEmbeds.Add(streamModel.Id, eb);
         }
 
         public async Task VerifyAndGetStreamIdAsync()
@@ -368,7 +369,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 }
                 catch (TwitchLib.Api.Core.Exceptions.InternalServerErrorException ex)
                 {
-                    await Console.Out.WriteLineAsync($"{ex.GetType().Name}: GetUser failed at {s}. Skipping...");
+                    await Console.Out.WriteLineAsync($"{ex.GetType().Name}: GetUser failed at {s}. Deleting...");
                 }
             }
 
@@ -389,9 +390,9 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 
         public async Task UpdateChannelsToMonitor()
         {
-            GetStreamerList();
             await GetStreamerIdDictAsync();
-            _liveStreamMonitor.SetChannelsByName(StreamList);
+            _liveStreamMonitor.SetChannelsById(StreamIdList);
+            GetStreamerList();
         }
 
         public bool StopLsm()

@@ -3,6 +3,7 @@
     public class StreamModel
     {
         public string Stream { get; set; }
+        public string Id { get; set; }
         public string Avatar { get; set; }
         public string Title { get; set; }
         public string Game { get; set; }
