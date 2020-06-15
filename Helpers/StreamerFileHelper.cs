@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 using BorisGangBot_Mk2.Services.LiveStreamMono;
 using Microsoft.Extensions.Configuration;
+using TwitchLib.Api;
 
 namespace BorisGangBot_Mk2.Helpers
 {

@@ -18,6 +18,10 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         // List of Streamers by UserLogin
         public List<string> StreamList { get; protected set; }
 
+        public List<string> StreamIdList { get; protected set; }
+
+        public Dictionary<string, string> StreamIds { get; protected set; }
+
         protected Dictionary<string, StreamModel> StreamModels { get; set; }
 
         protected Dictionary<string, string> StreamProfileImages { get; set; }

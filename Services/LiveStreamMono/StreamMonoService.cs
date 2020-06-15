@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using BorisGangBot_Mk2.Models;
+﻿using BorisGangBot_Mk2.Models;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 using TwitchLib.Api;
 using TwitchLib.Api.Helix.Models.Games;
 using TwitchLib.Api.Helix.Models.Users;
@@ -41,7 +42,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             {
                 UpdInt = int.Parse(_config["liveStreamMono:updIntervalSeconds"]);
             }
-            catch 
+            catch
             {
                 Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Failed to parse Update Interval from _config.yml. Defaulting to 30 seconds.");
                 UpdInt = 30;
@@ -56,10 +57,11 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         }
 
         #region CreateStreamMonoAsync
-        private async Task CreateStreamMonoAsync()
+        public async Task CreateStreamMonoAsync()
         {
             StreamModels = new Dictionary<string, StreamModel>();
             await Task.Run(GetStreamerList);
+            await GetStreamerIdDictAsync();
 
             await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: GUILD COUNT {_discord.Guilds.Count}");
 
@@ -72,7 +74,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 int currentPos = 0;
 
                 await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Current Guild: {eguilds.Current.Name}");
-                
+
                 IEnumerator<SocketTextChannel> echannels = eguilds.Current.TextChannels.GetEnumerator();
 
                 echannels.MoveNext();
@@ -103,7 +105,15 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService ERROR]: No Stream Update Notification channels were found!");
             }
 
-            StreamProfileImages = await GetProfImgUrlsAsync(StreamList);
+            try
+            {
+                StreamProfileImages = await GetProfImgUrlsAsync(StreamList);
+            }
+            catch (TwitchLib.Api.Core.Exceptions.InternalServerErrorException ex)
+            {
+                await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error collecting Profile Images. Verify the streamers and then start the service again.");
+                throw;
+            }
 
             _liveStreamMonitor = new LiveStreamMonitorService(TwApi, UpdInt, 100);
 
@@ -130,7 +140,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 
         private void OnServiceTickEvent(object sender, OnServiceTickArgs e)
         {
-            
+
         }
 
         private static void OnServiceStartedEvent(object sender, OnServiceStartedArgs e)
@@ -145,7 +155,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 
         private async void OnStreamOnlineEventAsync(object sender, OnStreamOnlineArgs e)
         {
-            
+
             var gameTemp = new List<string>
             {
                 e.Stream.GameId
@@ -160,14 +170,13 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error at GetGamesResponse - {ex.Message}");
             }
 
-
             try
             {
                 UpdateLiveStreamModelsAsync(e.Stream.UserName, e.Stream, getGamesResponse);
             }
             catch (Exception ex)
             {
-                await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error at GetGamesResponse - {ex.Message}");
+                await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error at UpdateLiveStreamModelsAsync - {ex.Message}");
             }
 
             await Console.Out.WriteLineAsync(StreamModels.Keys.Contains(e.Stream.UserName) + " " + e.Channel + " " + e.Stream.UserName);
@@ -188,21 +197,6 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 return;
             }
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService ERROR]: Channels to monitor were not properly set!");
-        }
-
-        private void GetStreamerList()
-        {
-            Deserializer deserializer = new Deserializer();
-            string result;
-
-            using (StreamReader reader = File.OpenText("./Streamers.yml"))
-            {
-                result = reader.ReadToEnd();
-                reader.Close();
-            }
-
-            StreamList = deserializer.Deserialize<List<string>>(result);
-            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: StreamerList Creation finished.");
         }
 
         #endregion
@@ -250,6 +244,37 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         //    }
         //}
 
+        private void GetStreamerList()
+        {
+            Deserializer deserializer = new Deserializer();
+            string result;
+
+            using (StreamReader reader = File.OpenText("./Streamers.yml"))
+            {
+                result = reader.ReadToEnd();
+                reader.Close();
+            }
+
+            StreamList = deserializer.Deserialize<List<string>>(result);
+            Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: StreamerList Creation finished.");
+        }
+
+        private async Task GetStreamerIdDictAsync()
+        {
+            Deserializer deserializer = new Deserializer();
+            string result;
+
+            using (StreamReader reader = File.OpenText("./Streamids.yml"))
+            {
+                result = await reader.ReadToEndAsync();
+                reader.Close();
+            }
+
+            StreamIds = deserializer.Deserialize<Dictionary<string, string>>(result);
+            StreamIdList = StreamIds.Keys
+            await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Streamer ID List Creation finished.");
+        }
+
         private void UpdateLiveStreamModelsAsync(string streamToModel, // Twitch UserName
             TwitchLib.Api.Helix.Models.Streams.Stream twitchStream, // Twitch Stream Model
             GetGamesResponse game) // Game
@@ -266,7 +291,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 Viewers = twitchStream.ViewerCount,
                 Link = $"https://www.twitch.tv/{streamToModel}"
             };
-            
+
             if (StreamModels.ContainsKey(streamToModel))
                 StreamModels.Remove(streamToModel);
 
@@ -322,6 +347,39 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             StreamEmbeds.Add(streamModel.Stream, eb);
         }
 
+        public async Task VerifyAndGetStreamIdAsync()
+        {
+            Serializer serializer = new Serializer();
+            Dictionary<string, string> streamsidsDict = new Dictionary<string, string>();
+            List<string> verifiedStreams = new List<string>();
+            List<string> tmp = new List<string>()
+                { " " };
+
+            foreach (string s in StreamList)
+            {
+                tmp[0] = s;
+                await Console.Out.WriteLineAsync($"Current streamer name: {s}");
+                try
+                {
+                    GetUsersResponse response = await TwApi.Helix.Users.GetUsersAsync(logins: tmp, accessToken: TwApi.Settings.AccessToken);
+                    streamsidsDict.Add(response.Users[0].Login, response.Users[0].Id);
+                    verifiedStreams.Add(s);
+                    Thread.Sleep(5000); // So I don't shit on the api too hard :(
+                }
+                catch (TwitchLib.Api.Core.Exceptions.InternalServerErrorException ex)
+                {
+                    await Console.Out.WriteLineAsync($"{ex.GetType().Name}: GetUser failed at {s}. Skipping...");
+                }
+            }
+
+            object streamsFinal = serializer.Serialize(verifiedStreams);
+            object dictFinal = serializer.Serialize(streamsidsDict);
+            await File.WriteAllTextAsync("./Streamids.yml", dictFinal.ToString());
+            await File.WriteAllTextAsync("./Streamers.yml", streamsFinal.ToString());
+
+            await UpdateChannelsToMonitor();
+        }
+
         #endregion
 
         #region General Purpose Functions
@@ -329,9 +387,10 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         // General Purpose Functions
         // -----
 
-        public void UpdateChannelsToMonitor()
+        public async Task UpdateChannelsToMonitor()
         {
             GetStreamerList();
+            await GetStreamerIdDictAsync();
             _liveStreamMonitor.SetChannelsByName(StreamList);
         }
 

@@ -37,7 +37,7 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
                 if (t == 1)
                 {
                     await ReplyAsync($"Successfully added {streamer}!", false);
-                    _lsms.UpdateChannelsToMonitor();
+                    await _lsms.UpdateChannelsToMonitor();
                 }
                 else if (t == 0)
                 {
@@ -79,7 +79,7 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
                 if (t)
                 {
                     await ReplyAsync($"Successfully removed {streamer}.");
-                    _lsms.UpdateChannelsToMonitor();
+                    await _lsms.UpdateChannelsToMonitor();
                 }
                 else
                 {

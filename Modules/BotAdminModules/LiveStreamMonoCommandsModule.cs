@@ -49,5 +49,14 @@ namespace BorisGangBot_Mk2.Modules.BotAdminModules
                 await ReplyAsync("Failed to start the Live Stream Monitor Service. Are you sure it's not already running?");
             }
         }
+
+        [Command("verifystreams")]
+        [Alias("vs", "VerifyStreams", "Verify_Streams", "verify_streams")]
+        [Summary("Verifies the list of streamers, removing those who would cause errors or don't exist.")]
+        public async Task LMS_VerifyStreamsAsync()
+        {
+            await ReplyAsync("Verification has begun. This might take a while...");
+            await _streams.VerifyAndGetStreamIdAsync();
+        }
     }
 }
