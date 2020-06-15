@@ -111,8 +111,15 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             }
             catch (TwitchLib.Api.Core.Exceptions.InternalServerErrorException ex)
             {
-                await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error collecting Profile Images. Verify the streamers and then start the service again.");
-                throw;
+                if (CreationAttempts == 5)
+                {
+                    await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Maximum number of creation attempts exceeded. Live Stream Monitor Service is no longer available.");
+                    return;
+                }
+                await Console.Out.WriteLineAsync($"{ex.GetType().Name} - Attempt #{CreationAttempts}: Error collecting Profile Images. Verify the streamers and then start the service again.");
+                VerifyAndGetStreamIdAsync().RunSynchronously();
+                CreationAttempts++;
+                await CreateStreamMonoAsync();
             }
 
             _liveStreamMonitor = new LiveStreamMonitorService(TwApi, UpdInt, 100);
@@ -160,6 +167,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             {
                 e.Stream.GameId
             };
+
             GetGamesResponse getGamesResponse = new GetGamesResponse();
             try
             {
@@ -179,13 +187,11 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error at UpdateLiveStreamModelsAsync - {ex.Message}");
             }
 
-            await Console.Out.WriteLineAsync(StreamModels.Keys.Contains(e.Stream.UserId) + " " + e.Channel + " " + e.Stream.UserName);
+            EmbedBuilder eb = CreateStreamerEmbed(StreamModels[e.Stream.UserId]);
 
-            CreateStreamerEmbed(StreamModels[e.Stream.UserId]);
             foreach (var x in StreamNotifChannels)
             {
-                await x.SendMessageAsync(null, false, StreamEmbeds[e.Stream.UserId].Build());
-                StreamEmbeds.Remove(e.Stream.UserId);
+                await x.SendMessageAsync(null, false, eb.Build());
             }
         }
 
@@ -273,12 +279,8 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             return profImages;
         }
 
-        private void CreateStreamerEmbed(StreamModel streamModel)
+        private EmbedBuilder CreateStreamerEmbed(StreamModel streamModel)
         {
-            if (StreamEmbeds.ContainsKey(streamModel.Id))
-                StreamEmbeds.Remove(streamModel.Id);
-
-
             var a = new EmbedAuthorBuilder()
             {
                 Name = streamModel.Stream,
@@ -305,7 +307,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 x.Value = streamModel.Viewers;
             });
 
-            StreamEmbeds.Add(streamModel.Id, eb);
+            return eb;
         }
 
         public async Task VerifyAndGetStreamIdAsync()
