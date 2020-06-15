@@ -212,42 +212,65 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         // Monitor Service Required Functions
         // -----
 
-        private void UpdateLiveStreamModelsAsync(string streamToModel, TwitchLib.Api.Helix.Models.Streams.Stream twStream, GetGamesResponse gamesResponse)
+        //private void UpdateLiveStreamModelsAsync(string streamToModel, TwitchLib.Api.Helix.Models.Streams.Stream twStream, GetGamesResponse gamesResponse)
+        //{
+        //    List<string> gameIdTemp = new List<string> { twStream.GameId };
+
+        //    string gameName = gamesResponse.Games.Length != 0 ? gamesResponse.Games[0].Name : null;
+
+        //    try
+        //    {
+        //        // Just update Title, Game, and Viewers
+        //        StreamModels[streamToModel].Game = gameName;
+        //        StreamModels[streamToModel].Title = twStream.Title;
+        //        StreamModels[streamToModel].Viewers = twStream.ViewerCount;
+        //        return;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.Out.WriteLine($"{ex.GetType().Name}: Error inside UpdateLiveStreamModelsAsync - {ex.Message}");
+        //    }
+
+        //    StreamModel streamModel = new StreamModel()
+        //    {
+        //        Stream = twStream.UserName,
+        //        Avatar = StreamProfileImages[streamToModel],
+        //        Title = twStream.Title,
+        //        Game = gameName,
+        //        Viewers = twStream.ViewerCount,
+        //        Link = $"https://www.twitch.tv/{twStream.UserName}"
+        //    };
+        //    try
+        //    {
+        //        StreamModels.Add(streamModel.Stream, streamModel);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Console.Out.WriteLineAsync(e.Message);
+        //    }
+        //}
+
+        private void UpdateLiveStreamModelsAsync(string streamToModel, // Twitch UserName
+            TwitchLib.Api.Helix.Models.Streams.Stream twitchStream, // Twitch Stream Model
+            GetGamesResponse game) // Game
         {
-            List<string> gameIdTemp = new List<string> { twStream.GameId };
-
-            string gameName = gamesResponse.Games.Length != 0 ? gamesResponse.Games[0].Name : null;
-
-            try
-            {
-                // Just update Title, Game, and Viewers
-                StreamModels[streamToModel].Game = gameName;
-                StreamModels[streamToModel].Title = twStream.Title;
-                StreamModels[streamToModel].Viewers = twStream.ViewerCount;
-                return;
-            }
-            catch (Exception ex)
-            {
-                Console.Out.WriteLine($"{ex.GetType().Name}: Error inside UpdateLiveStreamModelsAsync - {ex.Message}");
-            }
+            List<string> gameIdTemp = new List<string> { twitchStream.GameId };
+            string gameName = game.Games.Length != 0 ? game.Games[0].Name : "Unknown";
 
             StreamModel streamModel = new StreamModel()
             {
-                Stream = twStream.UserName,
+                Stream = streamToModel,
                 Avatar = StreamProfileImages[streamToModel],
-                Title = twStream.Title,
+                Title = twitchStream.Title,
                 Game = gameName,
-                Viewers = twStream.ViewerCount,
-                Link = $"https://www.twitch.tv/{twStream.UserName}"
+                Viewers = twitchStream.ViewerCount,
+                Link = $"https://www.twitch.tv/{streamToModel}"
             };
-            try
-            {
-                StreamModels.Add(streamModel.Stream, streamModel);
-            }
-            catch (Exception e)
-            {
-                Console.Out.WriteLineAsync(e.Message);
-            }
+            
+            if (StreamModels.ContainsKey(streamToModel))
+                StreamModels.Remove(streamToModel);
+
+            StreamModels.Add(streamToModel, streamModel);
         }
 
         private async Task<Dictionary<string, string>> GetProfImgUrlsAsync(List<string> streams)
@@ -267,16 +290,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         private void CreateStreamerEmbed(StreamModel streamModel)
         {
             if (StreamEmbeds.ContainsKey(streamModel.Stream))
-            {
-                EmbedBuilder embed = StreamEmbeds[streamModel.Stream];
-
-                embed.Title = streamModel.Title;
-                embed.Fields[0].Value = streamModel.Game ?? "Unknown";
-                embed.Fields[1].Value = streamModel.Viewers;
-
-                StreamEmbeds[streamModel.Stream.ToLower()] = embed;
-                return;
-            }
+                StreamEmbeds.Remove(streamModel.Stream);
 
 
             var a = new EmbedAuthorBuilder()
@@ -296,7 +310,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             {
                 x.IsInline = true;
                 x.Name = "**Playing:**";
-                x.Value = streamModel.Game ?? "Unknown";
+                x.Value = streamModel.Game;
             });
             eb.AddField(x =>
             {
@@ -314,10 +328,29 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         // -----
         // General Purpose Functions
         // -----
+
         public void UpdateChannelsToMonitor()
         {
             GetStreamerList();
             _liveStreamMonitor.SetChannelsByName(StreamList);
+        }
+
+        public bool StopLsm()
+        {
+            if (!_liveStreamMonitor.Enabled)
+                return false;
+
+            _liveStreamMonitor.Stop();
+            return true;
+        }
+
+        public bool StartLsm()
+        {
+            if (_liveStreamMonitor.Enabled)
+                return false;
+
+            _liveStreamMonitor.Start();
+            return true;
         }
 
         #endregion
