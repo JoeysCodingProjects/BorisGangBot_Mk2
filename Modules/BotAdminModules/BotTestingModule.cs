@@ -28,14 +28,12 @@ namespace BorisGangBot_Mk2.Modules.BotAdminModules
             _guildinfo = guildinfo;
         }
 
-        [Command("randominfo")]
+        [Command("test")]
         [Summary("I still use print statements to test my code because im a naughty boy")]
         public async Task SendRandomInfoAsync()
         {
-            SocketGuildUser user = Context.Guild.GetUser(Context.User.Id);
-            IEnumerable<string> userroles = user.Roles.Select(r => r.Name);
             string msg = "";
-            foreach (string r in userroles)
+            foreach (string r in _streams.StreamIdList)
             {
                 msg += " " + r;
             }

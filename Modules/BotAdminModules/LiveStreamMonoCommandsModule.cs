@@ -16,6 +16,14 @@ namespace BorisGangBot_Mk2.Modules.BotAdminModules
             _streams = streams;
         }
 
+        [Command("status")]
+        [Alias("stat", "stats", "Status", "state", "State")]
+        [Summary("Returns the current status of the Live Stream Monitor Service. (on or off)")]
+        public async Task LMS_StatusAsync()
+        {
+            await ReplyAsync($"Live Stream Monitor Service is currently {_streams.StatusLsm()}");
+        }
+
         [Command("stop")]
         [Alias("Stop", "STOP")]
         [Summary("Stops the Live Stream Monitor Service.")]

@@ -271,7 +271,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             }
 
             StreamIds = deserializer.Deserialize<Dictionary<string, string>>(result);
-            StreamIdList = StreamIds.Keys
+            StreamIdList = StreamIds.Values.AsEnumerable().ToList(); 
             await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Streamer ID List Creation finished.");
         }
 
@@ -410,6 +410,11 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 
             _liveStreamMonitor.Start();
             return true;
+        }
+
+        public string StatusLsm()
+        {
+            return _liveStreamMonitor.Enabled ? "Online" : "Offline";
         }
 
         #endregion
