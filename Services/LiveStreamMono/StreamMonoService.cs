@@ -55,7 +55,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         public async Task CreateStreamMonoAsync()
         {
             // Check to see if a _liveStreamService has already been created
-            if (_liveStreamMonitor == null)
+            if (_liveStreamMonitor != null)
                 return; // If one has, don't make a new one. Causes bot to send tons of duplicate alerts.
 
             StreamModels = new Dictionary<string, StreamModel>();
@@ -162,8 +162,6 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             if (StreamsOnline.Contains(e.Stream.UserId))
                 return;
 
-            StreamsOnline.Add(e.Stream.UserId);
-
             var gameTemp = new List<string>
             {
                 e.Stream.GameId
@@ -176,7 +174,8 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             }
             catch (Exception ex)
             {
-                await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error at GetGamesResponse - {ex.Message}");
+                await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error at GetGamesResponse. Aborting process. - {ex.Message}");
+                return;
             }
 
             try
@@ -185,7 +184,8 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             }
             catch (Exception ex)
             {
-                await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error at UpdateLiveStreamModelsAsync - {ex.Message}");
+                await Console.Out.WriteLineAsync($"{ex.GetType().Name}: Error at UpdateLiveStreamModelsAsync. Aborting process. - {ex.Message}");
+                return;
             }
 
             EmbedBuilder eb = CreateStreamerEmbed(StreamModels[e.Stream.UserId]);
@@ -194,11 +194,21 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             {
                 await x.SendMessageAsync(null, false, eb.Build());
             }
+            StreamsOnline.Add(e.Stream.UserId);
+            if (StreamsOnline.Contains(e.Stream.UserId))
+            {
+                await Console.Out.WriteLineAsync($"Successfully add {e.Stream.UserName} to the StreamsOnline list.");
+            }
+            else
+            {
+                await Console.Out.WriteLineAsync($"Failed to add {e.Stream.UserName} to the StreamsOnline list.");
+            }
         }
 
         private void OnStreamOfflineEvent(object sender, OnStreamOfflineArgs e)
         {
-            StreamsOnline.Remove(e.Stream.UserId);
+            bool removalBool = StreamsOnline.Remove(e.Stream.UserId);
+            Console.Out.WriteLine($"Was able to remove {e.Stream.UserName} from the StreamsOnline List? - {removalBool}");
         }
 
         private void OnChannelsSetEvent(object sender, OnChannelsSetArgs e)
