@@ -36,26 +36,32 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
             {
                 if (t == 1)
                 {
-                    await ReplyAsync($"Successfully added {streamer}!", false);
-                    _lsms.UpdateChannelsToMonitor();
+                    await ReplyAsync($"Successfully added {streamer}!");
+                    await _lsms.UpdateChannelsToMonitor();
                 }
                 else if (t == 0)
                 {
-                    await ReplyAsync("That streamer is already on the list.", false);
+                    await ReplyAsync("That streamer is already on the list.");
                 }
                 else if (t == -1)
                 {
-                    await ReplyAsync($"Failed to verify that anyone by the name {streamer} exists on Twitch. Did you spell their name correctly?");
+                    await ReplyAsync(
+                        $"Failed to verify that anyone by the name {streamer} exists on Twitch. Did you spell their name correctly?");
                 }
                 else
                 {
-                    await ReplyAsync("I don't know how this happened, but something returned a value that should not be possible.");
+                    await ReplyAsync(
+                        "I don't know how this happened, but something returned a value that should not be possible.");
                 }
             }
             catch (Exception e)
             {
                 await Console.Out.WriteLineAsync(e.Message);
                 await ReplyAsync("Something went wrong adding this streamer.");
+            }
+            finally
+            {
+                await _lsms.UpdateChannelsToMonitor();
             }
         }
         #endregion
@@ -79,7 +85,7 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
                 if (t)
                 {
                     await ReplyAsync($"Successfully removed {streamer}.");
-                    _lsms.UpdateChannelsToMonitor();
+                    await _lsms.UpdateChannelsToMonitor();
                 }
                 else
                 {
