@@ -29,13 +29,13 @@ namespace BorisGangBot_Mk2.Helpers
         public async Task<int> TryAddStreamerAsync(string streamer)
         {
             string s = streamer.ToLower();
+            string streamerId;
 
             if (_lsms.StreamList.Contains(s))
                 return 0;
 
             VerifyStreamerHelper verifyStreamer = new VerifyStreamerHelper(_lsms);
 
-            string streamerId;
             try
             {
                 streamerId = await verifyStreamer.TryVerifyStreamerAsync(streamer);
