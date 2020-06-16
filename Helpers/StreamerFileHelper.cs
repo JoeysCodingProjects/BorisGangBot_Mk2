@@ -64,8 +64,8 @@ namespace BorisGangBot_Mk2.Helpers
                 reader.Close();
             }
 
-            List<string> streamslist = deserializer.Deserialize<List<string>>(result);
-            Dictionary<string, string> streamsIdDict = deserializer.Deserialize<Dictionary<string, string>>(result2);
+            List<string> streamslist = deserializer.Deserialize<List<string>>(result) ?? new List<string>();
+            Dictionary<string, string> streamsIdDict = deserializer.Deserialize<Dictionary<string, string>>(result2) ?? new Dictionary<string, string>();
 
             streamsIdDict.Add(s, streamerId);
             streamslist.Add(s);

@@ -108,13 +108,14 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             }
             catch (TwitchLib.Api.Core.Exceptions.InternalServerErrorException ex)
             {
-                if (CreationAttempts == 5)
+                if (CreationAttempts == 1)
                 {
                     await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Maximum number of creation attempts exceeded. Live Stream Monitor Service is no longer available.");
                     CreationAttempts = 0;
                     return;
                 }
-                await Console.Out.WriteLineAsync($"{ex.GetType().Name} - Attempt #{CreationAttempts}: Error collecting Profile Images. Verify the streamers and then start the service again.");
+
+                await Console.Out.WriteLineAsync($"{ex.GetType().Name} - Attempt #{CreationAttempts}: Error collecting Profile Images. Attempting to verify the streamers before trying again.");
                 VerifyAndGetStreamIdAsync().RunSynchronously();
                 CreationAttempts++;
                 await CreateStreamMonoAsync();
@@ -129,9 +130,16 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             _liveStreamMonitor.OnStreamOnline += OnStreamOnlineEventAsync;
             _liveStreamMonitor.OnStreamOffline += OnStreamOfflineEvent;
 
-            _liveStreamMonitor.SetChannelsById(StreamIdList);
+            try
+            {
+                _liveStreamMonitor.SetChannelsById(StreamIdList);
 
-            _liveStreamMonitor.Start();
+                _liveStreamMonitor.Start();
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Stream list is empty. Start the service manually using \";lsm start\" once you have added at least one streamer.");
+            }
 
             await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Was service enabled? - {_liveStreamMonitor.Enabled}");
         }
@@ -230,6 +238,9 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 
         private void GetStreamerList()
         {
+            if (!File.Exists(Path.Combine(AppContext.BaseDirectory, "Streamers.yml")))
+                File.Create(Path.Combine(AppContext.BaseDirectory, "Streamers.yml")).Dispose();
+
             Deserializer deserializer = new Deserializer();
             string result;
 
@@ -239,12 +250,16 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 reader.Close();
             }
 
-            StreamList = deserializer.Deserialize<List<string>>(result);
+            List<string> tmp = deserializer.Deserialize<List<string>>(result);
+            StreamList = tmp ?? new List<string>();
             Console.Out.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: StreamerList Creation finished.");
         }
 
         private async Task GetStreamerIdDictAsync()
         {
+            if (!File.Exists(Path.Combine(AppContext.BaseDirectory, "Streamids.yml")))
+                File.Create(Path.Combine(AppContext.BaseDirectory, "Streamids.yml")).Dispose();
+
             Deserializer deserializer = new Deserializer();
             string result;
 
@@ -253,9 +268,11 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 result = await reader.ReadToEndAsync();
                 reader.Close();
             }
+            var tmp = deserializer.Deserialize<Dictionary<string, string>>(result);
+            StreamIds = tmp ?? new Dictionary<string, string>();
+            
+            StreamIdList = StreamIds != null ? StreamIds.Values.AsEnumerable().ToList() : new List<string>();
 
-            StreamIds = deserializer.Deserialize<Dictionary<string, string>>(result);
-            StreamIdList = StreamIds.Values.AsEnumerable().ToList(); 
             await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Streamer ID List Creation finished.");
         }
 
@@ -284,6 +301,9 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         private async Task<Dictionary<string, string>> GetProfImgUrlsAsync(List<string> streamIds)
         {
             Dictionary<string, string> profImages = new Dictionary<string, string>();
+
+            if (!streamIds.Any())
+                return profImages;
 
             GetUsersResponse usersResponse = await TwApi.Helix.Users.GetUsersAsync(streamIds, null, TwApi.Settings.AccessToken);
 
@@ -369,7 +389,17 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         public async Task UpdateChannelsToMonitor()
         {
             await GetStreamerIdDictAsync();
-            _liveStreamMonitor.SetChannelsById(StreamIdList);
+            try
+            {
+                _liveStreamMonitor.SetChannelsById(StreamIdList);
+            }
+            catch (ArgumentException e)
+            {
+                Console.WriteLine($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Stopping Live Stream Monitor: {e.Message}");
+                if (_liveStreamMonitor.Enabled)
+                    _liveStreamMonitor.Stop();
+            }
+            await GetProfImgUrlsAsync(StreamIdList);
             GetStreamerList();
         }
 

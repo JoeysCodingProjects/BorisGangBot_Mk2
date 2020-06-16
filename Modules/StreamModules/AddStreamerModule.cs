@@ -94,7 +94,7 @@ namespace BorisGangBot_Mk2.Modules.StreamModules
             }
             catch (Exception e)
             {
-                await Console.Out.WriteLineAsync(e.Message);
+                await Console.Out.WriteLineAsync(e.ToString());
                 await ReplyAsync("Something went wrong trying to remove this streamer.");
             }
         }
