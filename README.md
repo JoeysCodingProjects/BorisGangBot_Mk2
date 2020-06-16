@@ -10,25 +10,25 @@ BorisGangBot is a project of mine to create my own fully fleshed out bot for my 
 
 ## What are it's functions?
 The bot is (or is going to be) capable of:
-- Twitch Stream alert notifications
-- Music bot functionalities
-- Automatic role assignment through a "roleme {rolename}" esque function
-- Quickly provide information about any twitch stream
-- And much much more.
+- [x] Twitch Stream alert notifications
+- [ ] Music bot functionalities
+- [x] Automatic role assignment through a "roleme {rolename}" esque function
+- [ ] Quickly provide information about any twitch stream
+- [ ] ...And much much more.
 
 
-# Some things to note:
-This bot is very young, and practically still in it's proof of concept phase. I have not gone through and revised the code,
-I do not do proper testing i.e. unit testing, and is not in a state where you could host it on multiple servers of your own.
-Although, feel free to fork my code and fix my bot to make that a reality! 
+# Update : 6-16-2020
+Bot (in branch Exceps+Fixes) is in a somewhat stable state. I believe I've fixed most of the
+bugs inside Live Stream Monitor such as duplicate alerts, failing to find streamers, not updating
+the streamers list, etc. The code through out the program is still pretty inefficient and hard to
+read, but I'll be coming back to that after I finish up cleaning up the bugs.
 
+# Notes on setting up the bot:
+The bot requires 3 files placed inside the base directory (where the actual .exe & .dll are). 
+The most important one is the \_config.yml file. Inside this file you will set it up as such:
+```yaml
 
-I won't be accepting any pull requests right now as this is a 
-personal project that i want to see through to the end on my own.
-I've learned A LOT of stuff, from async-coding, to service provider,
-all the way to optimizing code to get the fastest response time from
-command to bot possible. 
-
+```
 
 ## Feel free to use any of the code you see!
 I apologize for the lack of comments, still working on that. Also, I hope you can ignore
