@@ -1,3 +1,4 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/joeyscodingprojects/borisgangbot_mk2/badge/master)](https://www.codefactor.io/repository/github/joeyscodingprojects/borisgangbot_mk2/overview/master)
 # BorisGangBot_Mk2
 
 ## Written in C# using Discord.Net and TwitchLib
