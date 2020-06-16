@@ -35,7 +35,7 @@ namespace BorisGangBot_Mk2.Services
 
             string logText = $"{DateTime.UtcNow.ToString("hh:mm:ss")} [{msg.Severity}] {msg.Source}: {msg.Exception?.ToString() ?? msg.Message}";
             
-            //File.AppendAllText(_logFile, logText + "\n");
+            File.AppendAllText(_logFile, logText + "\n");
 
             return Console.Out.WriteLineAsync(logText);
         }
