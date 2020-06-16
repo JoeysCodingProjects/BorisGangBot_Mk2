@@ -20,6 +20,7 @@ namespace BorisGangBot_Mk2.Modules.RoleModules
         }
 
         [Command("roleme")]
+        [Alias("Roleme", "role")]
         [Summary("Grants user the requested role.")]
         public async Task RoleMeAsync(string role)
         {
@@ -29,17 +30,25 @@ namespace BorisGangBot_Mk2.Modules.RoleModules
             string rolelower = role.ToLower();
 
             IEnumerable<string> userroles = user.Roles.Select(r => r.Name.ToLower());
+            var userRolesList = userroles.ToList();
 
-            _guildinfo.GuildRoles.TryGetValue(Context.Guild.Id, out guildRoles);
+            bool getGuildRolesBool = _guildinfo.GuildRoles.TryGetValue(Context.Guild.Id, out guildRoles);
 
-            if (userroles.Contains(rolelower))
+            if (!getGuildRolesBool)
+            {
+                await ReplyAsync($"Something went wrong collecting the roles for {Context.Guild.Name}. Please try again in a moment.");
+                // Some kinda function to retry guild role collection 
+                return;
+            }
+
+            if (userRolesList.Contains(rolelower))
             {
                 await ReplyAsync($"{Context.User.Mention} You are already assigned the role {role}.");
                 return;
             }
             try
             {
-                if (!(user.Roles.ToString().Contains("BorisGoon")) && !(user.Roles.ToString().Contains("BorisGang")))
+                if (!(userRolesList.Contains("BorisGoon")) && !(userRolesList.Contains("BorisGang")))
                 {
                     guildRoles.TryGetValue("borisgoon", out rolo);
                     await user.AddRoleAsync(rolo);
