@@ -9,18 +9,11 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
     public abstract class StreamMonoServiceBase
     {
         // Live Stream Mono Creation attempts
-        private int _creationattempts = 0;
 
-        protected int CreationAttempts 
-        {
-            get { return _creationattempts; }
-            set
-            {
-                _creationattempts = value;
-            }
-        }
+        protected int CreationAttempts { get; set; } = 0;
+
         // Twitch API
-        public ITwitchAPI TwApi;
+        public ITwitchAPI TwApi { get; protected set; }
 
         // Timer Update Interval in milliseconds
         protected int UpdInt { get; set; }
@@ -29,6 +22,8 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         public List<string> StreamList { get; protected set; }
 
         public List<string> StreamIdList { get; protected set; }
+
+        public List<string> StreamsOnline { get; } = new List<string>();
 
         public Dictionary<string, string> StreamIds { get; protected set; }
 

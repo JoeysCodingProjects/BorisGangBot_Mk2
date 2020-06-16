@@ -54,6 +54,10 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         #region CreateStreamMonoAsync
         public async Task CreateStreamMonoAsync()
         {
+            // Check to see if a _liveStreamService has already been created
+            if (_liveStreamMonitor == null)
+                return; // If one has, don't make a new one. Causes bot to send tons of duplicate alerts.
+
             StreamModels = new Dictionary<string, StreamModel>();
             await Task.Run(GetStreamerList);
             await GetStreamerIdDictAsync();
@@ -107,6 +111,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                 if (CreationAttempts == 5)
                 {
                     await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Maximum number of creation attempts exceeded. Live Stream Monitor Service is no longer available.");
+                    CreationAttempts = 0;
                     return;
                 }
                 await Console.Out.WriteLineAsync($"{ex.GetType().Name} - Attempt #{CreationAttempts}: Error collecting Profile Images. Verify the streamers and then start the service again.");
@@ -122,6 +127,7 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             _liveStreamMonitor.OnServiceStarted += OnServiceStartedEvent;
             _liveStreamMonitor.OnServiceStopped += OnServiceStoppedEvent;
             _liveStreamMonitor.OnStreamOnline += OnStreamOnlineEventAsync;
+            _liveStreamMonitor.OnStreamOffline += OnStreamOfflineEvent;
 
             _liveStreamMonitor.SetChannelsById(StreamIdList);
 
@@ -129,7 +135,6 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 
             await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Was service enabled? - {_liveStreamMonitor.Enabled}");
         }
-
         #endregion
 
 
@@ -140,7 +145,6 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 
         private void OnServiceTickEvent(object sender, OnServiceTickArgs e)
         {
-
         }
 
         private static void OnServiceStartedEvent(object sender, OnServiceStartedArgs e)
@@ -155,6 +159,10 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 
         private async void OnStreamOnlineEventAsync(object sender, OnStreamOnlineArgs e)
         {
+            if (StreamsOnline.Contains(e.Stream.UserId))
+                return;
+
+            StreamsOnline.Add(e.Stream.UserId);
 
             var gameTemp = new List<string>
             {
@@ -186,6 +194,11 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
             {
                 await x.SendMessageAsync(null, false, eb.Build());
             }
+        }
+
+        private void OnStreamOfflineEvent(object sender, OnStreamOfflineArgs e)
+        {
+            StreamsOnline.Remove(e.Stream.UserId);
         }
 
         private void OnChannelsSetEvent(object sender, OnChannelsSetArgs e)
