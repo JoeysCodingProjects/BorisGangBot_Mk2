@@ -53,10 +53,10 @@
 
   <ItemGroup>
     <None Update="Streamers.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="Streamids.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="streams.yml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
