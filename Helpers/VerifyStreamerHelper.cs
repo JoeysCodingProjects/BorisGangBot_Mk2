@@ -1,12 +1,7 @@
-﻿using System;
+﻿using BorisGangBot_Mk2.Services.LiveStreamMono;
+using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using BorisGangBot_Mk2.Services;
-using BorisGangBot_Mk2.Services.LiveStreamMono;
-using Microsoft.Extensions.Configuration;
-using TwitchLib.Api.Helix.Models.Streams;
-using TwitchLib.Api;
 using TwitchLib.Api.Helix.Models.Users;
 
 
@@ -27,16 +22,15 @@ namespace BorisGangBot_Mk2.Helpers
             {
                 List<string> tmp = new List<string>();
                 tmp.Add(streamer);
-                tmp.Add(streamer);
 
-                GetUsersResponse result = await _lsms.TwApi.Helix.Users.GetUsersAsync(logins:tmp, accessToken:_lsms.TwApi.Settings.AccessToken);
+                GetUsersResponse result = await _lsms.TwApi.Helix.Users.GetUsersAsync(logins: tmp, accessToken: _lsms.TwApi.Settings.AccessToken);
 
                 return result.Users[0].Id;
             }
             catch (Exception e)
             {
-                return null;
+                throw;
             }
         }
-}
+    }
 }

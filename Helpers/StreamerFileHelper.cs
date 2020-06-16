@@ -35,9 +35,16 @@ namespace BorisGangBot_Mk2.Helpers
 
             VerifyStreamerHelper verifyStreamer = new VerifyStreamerHelper(_lsms);
 
-            string streamerId = await verifyStreamer.TryVerifyStreamerAsync(streamer);
-            if (streamerId == null)
+            string streamerId;
+            try
+            {
+                streamerId = await verifyStreamer.TryVerifyStreamerAsync(streamer);
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                Console.WriteLine(e.Message);
                 return -1;
+            }
 
             Deserializer deserializer = new Deserializer();
             Serializer serializer = new Serializer();

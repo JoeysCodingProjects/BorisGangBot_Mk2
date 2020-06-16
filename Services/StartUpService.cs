@@ -38,13 +38,15 @@ namespace BorisGangBot_Mk2.Services
 
         public async Task StartAsync()
         {
-            string discordToken = _config["tokens:discord"]; // Token used by Released bot
-            //string discordToken = _config["tokens:discord_testing"]; // Token used by separate dev version of bot
+            //string discordToken = _config["tokens:discord"]; // Token used by Released bot
+            string discordToken = _config["tokens:discord_testing"]; // Token used by separate dev version of bot
 
             if (string.IsNullOrWhiteSpace(discordToken))
             {
                 throw new Exception("Please enter bot token into the '_config.yaml' file");
             }
+
+            _discord.Ready += _streams.CreateStreamMonoAsync;
 
             await _discord.LoginAsync(TokenType.Bot, discordToken);
             await _discord.StartAsync();
@@ -72,7 +74,7 @@ namespace BorisGangBot_Mk2.Services
                         break;
 
                     default:
-                        await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StartUp]: Bot Activity value was misspelled. Please double check _config.yml.");
+                        await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StartUp]: Bot Activity value was misspelled or does not exist. Please double check _config.yml.");
                         break;
                 }
             }

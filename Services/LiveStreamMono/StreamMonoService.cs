@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchLib.Api;
@@ -19,23 +18,19 @@ using YamlDotNet.Serialization;
 
 namespace BorisGangBot_Mk2.Services.LiveStreamMono
 {
-    public class StreamMonoService : LiveStreamMono.StreamMonoServiceBase
+    public class StreamMonoService : StreamMonoServiceBase
     {
         private readonly IConfigurationRoot _config;
         private readonly DiscordSocketClient _discord;
         private LiveStreamMonitorService _liveStreamMonitor;
-        private LoggingService _logging;
 
 
 
         public StreamMonoService(IConfigurationRoot config,
-            DiscordSocketClient discord,
-            LoggingService logging)
+            DiscordSocketClient discord)
         {
             _config = config;
             _discord = discord;
-            _logging = logging;
-            _discord.Ready += CreateStreamMonoAsync;
 
             // Assign Config File Variables
             try
@@ -88,17 +83,15 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
                     }
                     echannels.MoveNext();
                 }
-                currentPos = 0;
                 echannels.Dispose();
                 eguilds.MoveNext();
             }
             eguilds.Dispose();
-
             StreamNotifChannels = notifChannels;
 
-            if (StreamNotifChannels.Count != 0)
+            if (StreamNotifChannels.Any())
             {
-                await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Successfully collected Stream Update Notification channels.");
+                await Console.Out.WriteLineAsync($"{DateTime.UtcNow.ToString("hh:mm:ss")} [StreamMonoService]: Successfully collected Stream Update Notification channels. Amount: {StreamNotifChannels.Count()}");
             }
             else
             {
