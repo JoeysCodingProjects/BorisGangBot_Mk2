@@ -8,7 +8,17 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
 {
     public abstract class StreamMonoServiceBase
     {
+        // Live Stream Mono Creation attempts
+        private int _creationattempts = 0;
 
+        protected int CreationAttempts 
+        {
+            get { return _creationattempts; }
+            set
+            {
+                _creationattempts = value;
+            }
+        }
         // Twitch API
         public ITwitchAPI TwApi;
 
@@ -18,11 +28,13 @@ namespace BorisGangBot_Mk2.Services.LiveStreamMono
         // List of Streamers by UserLogin
         public List<string> StreamList { get; protected set; }
 
+        public List<string> StreamIdList { get; protected set; }
+
+        public Dictionary<string, string> StreamIds { get; protected set; }
+
         protected Dictionary<string, StreamModel> StreamModels { get; set; }
 
         protected Dictionary<string, string> StreamProfileImages { get; set; }
-
-        protected readonly Dictionary<string, EmbedBuilder> StreamEmbeds = new Dictionary<string, EmbedBuilder>();
 
         protected List<SocketTextChannel> StreamNotifChannels { get; set; }
 
