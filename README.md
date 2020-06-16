@@ -18,13 +18,15 @@ The bot is (or is going to be) capable of:
 
 
 ## Update : 6-16-2020
-Bot (in branch Exceps+Fixes) is in a somewhat stable state. I believe I've fixed most of the
+Bot is in a somewhat stable state. I believe I've fixed most of the
 bugs inside Live Stream Monitor such as duplicate alerts, failing to find streamers, not updating
-the streamers list, etc. The code through out the program is still pretty inefficient and hard to
-read, but I'll be coming back to that after I finish up cleaning up the bugs.
+the streamers list, etc. Short term testing shows no issues so far, have currently testing long term. 
+The code through out the program is still pretty inefficient and hard to read, but I'll be rewriting
+a majority of the code once I get music playing functionality up and running.
 
 ## Notes on setting up the bot:
-If you were to simply reuse the entire repository, you'll need to create a \_config.yml file in the base directory (where StartUp.cs is) containing the following:
+I've just pushed an update to make the bot very easy to just clone the repository and run, but you must follow this step first.
+You'll need to create a \_config.yml file in the base directory (where StartUp.cs is) containing the following:
 ```yaml
 prefix: ;
 tokens:
@@ -53,11 +55,11 @@ liveStreamMono:
 so surrounding the name with emojis on discord if fine.
 
 ## Feel free to use any of the code you see!
-I apologize for the lack of comments, still working on that. Also, I hope you can ignore
-all the inside jokes or weirdly named variables. Please feel free to ask any questions 
-by submitting an Issue (pretty good way to get in touch with me) or by some other means
-you can think of assuming you can get my info.
-
+It may be ugly code, but I'm sure it can offer plenty of assitance to anyone who may run into some awkward problems. If
+you would like me to clarify on a block of code, how I did something, or what something does, please don't hesitate
+to create an issue flagged as a **question** or even one asking that I return to a block of code and add
+comments explaining what's going on. I'm happy to assist. This is a learning experience for me and I'd be glad
+to share what I learn with others along the way.
 
 Anyways, hope someone finds this useful. Took a lot of time to learn all this but should anyone stumble upon this code
 looking for help in writing a discord bot in C#, it should come in handy a decent bit. Enjoy!
