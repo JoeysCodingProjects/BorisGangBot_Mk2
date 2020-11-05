@@ -1,4 +1,5 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/joeyscodingprojects/borisgangbot_mk2/badge/master)](https://www.codefactor.io/repository/github/joeyscodingprojects/borisgangbot_mk2/overview/master)
+## DISCORD REWORKED A LOT OF THEIR API, MOST OF THE CODE HERE IS LIKELY NOT FUNCTIONAL. Was wanting to write a new bot from scratch anyways :^)
 # BorisGangBot_Mk2
 
 ## Written in C# using Discord.Net and TwitchLib
